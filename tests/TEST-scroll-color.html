@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll Color Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; }
+    
+    /* Header */
+    #site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      transition: all 0.3s ease;
+    }
+    
+    #site-header[data-tone="dark"] {
+      background: rgba(20, 20, 20, 0.95);
+    }
+    
+    .brand-wordmark {
+      font-size: 20px;
+      font-weight: 700;
+      color: #000;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    #site-header[data-tone="dark"] .brand-wordmark {
+      color: #fff;
+    }
+    
+    .burger-indicator {
+      width: 30px;
+      height: 20px;
+      position: relative;
+    }
+    
+    .burger-indicator::before,
+    .burger-indicator::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #000;
+      transition: background 0.3s ease;
+    }
+    
+    .burger-indicator::before { top: 0; }
+    .burger-indicator::after { bottom: 0; }
+    
+    #site-header[data-tone="dark"] .burger-indicator::before,
+    #site-header[data-tone="dark"] .burger-indicator::after {
+      background: #fff;
+    }
+    
+    /* Sections */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 900;
+      padding-top: 60px;
+    }
+    
+    section[data-tone="light"] {
+      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+      color: #1a1a1a;
+    }
+    
+    section[data-tone="dark"] {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+      color: #f5f5f5;
+    }
+    
+    /* Console Output Box */
+    .console-box {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 400px;
+      max-height: 300px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      overflow-y: auto;
+      z-index: 9999;
+    }
+    
+    .console-box .log {
+      margin-bottom: 4px;
+    }
+    
+    .console-box .log.error { color: #f00; }
+    .console-box .log.warn { color: #fa0; }
+    .console-box .log.info { color: #0ff; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="site-header" data-tone="light">
+    <a href="/" class="brand-wordmark" data-text="Test">Test Wordmark</a>
+    <div class="burger-indicator"></div>
+  </header>
+
+  <!-- Test Sections -->
+  <section data-tone="light">
+    <div>
+      Section 1<br>
+      <small style="font-size: 24px;">data-tone="light"</small>
+    </div>
+  </section>
+
+  <section data-tone="dark">
+    <div>
+      Section 2<br>
+      <small style="font-size: 24px;">data-tone="dark"</small>
+    </div>
+  </section>
+
+  <section data-tone="light">
+    <div>
+      Section 3<br>
+      <small style="font-size: 24px;">data-tone="light"</small>
+    </div>
+  </section>
+
+  <section data-tone="dark">
+    <div>
+      Section 4<br>
+      <small style="font-size: 24px;">data-tone="dark"</small>
+    </div>
+  </section>
+
+  <!-- Console Output Box -->
+  <div class="console-box" id="console-box">
+    <div class="log info">Console Output:</div>
+  </div>
+
+  <script>
+    // Intercept console logs
+    const consoleBox = document.getElementById('console-box');
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    function addToConsoleBox(message, type = 'log') {
+      const div = document.createElement('div');
+      div.className = `log ${type}`;
+      div.textContent = typeof message === 'string' ? message : JSON.stringify(message);
+      consoleBox.appendChild(div);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      if(args[0] && args[0].includes('[nav')) {
+        addToConsoleBox(args[0], 'log');
+        if(args[1]) addToConsoleBox(JSON.stringify(args[1], null, 2), 'log');
+      }
+    };
+    
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      if(args[0] && args[0].includes('[nav')) {
+        addToConsoleBox(args[0], 'warn');
+      }
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      if(args[0] && args[0].includes('[nav')) {
+        addToConsoleBox(args[0], 'error');
+      }
+    };
+    
+    // Add scroll position indicator
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('site-header');
+      const currentTone = header.getAttribute('data-tone');
+      document.title = `Scroll: ${Math.round(window.scrollY)} | Tone: ${currentTone}`;
+    });
+  </script>
+
+  <!-- Your JavaScript -->
+  <script src="off-canvas-v13_5_FINAL.js"></script>
+  
+  <script>
+    // Additional debug info after load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        console.log('[TEST] Page fully loaded, checking setup...');
+        console.log('[TEST] Header found:', !!document.getElementById('site-header'));
+        console.log('[TEST] Sections found:', document.querySelectorAll('[data-tone]').length);
+        console.log('[TEST] Initial tone:', document.getElementById('site-header')?.getAttribute('data-tone'));
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

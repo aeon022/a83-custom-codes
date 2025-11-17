@@ -1,0 +1,114 @@
+VM14273:2 Console was cleared
+VM14273:3 ===== A83 DEBUG SCRIPT v9 (ULTIMATIVE AUTOPSIE) GESTARTET ======
+VM14273:9 [A83-Debug] 1. CSS Pointer-Events Status
+VM14273:19 Header (#site-header):       none
+VM14273:20 Wordmark (.brand-wordmark):    auto
+VM14273:21 Burger Slot (.burger-home-slot): auto
+VM14273:26 CSS-Fix ist KORREKT.
+VM14273:32 [A83-Debug] 2. Analyse der lock/unlockBody Funktionen
+VM14273:37 ALARM: Falsche 'lockBody'-Version (simplified) ist geladen.
+A83_DEBUG_V9 @ VM14273:37
+(anonymous) @ VM14273:167
+VM14273:42 ALARM: Falsche 'unlockBody'-Version (simplified) ist geladen.
+A83_DEBUG_V9 @ VM14273:42
+(anonymous) @ VM14273:167
+VM14273:50 [A83-Debug] 3. Event-Spion (v9) ist aktiv. Bitte klicke jetzt:
+VM14273:51   1. Scrolle nach unten (z.B. 2000px).
+VM14273:52   2. Klicke auf den BURGER (um zu ÖFFNEN)
+VM14273:53   3. Klicke auf das 'X' (um zu SCHLIESSEN)
+VM14273:54   4. Klicke auf den BURGER (um erneut zu ÖFFNEN)
+VM14273:55   5. Klicke auf den LEEREN HEADER
+VM14273:56   6. Klicke auf das WORDMARK
+VM14273:165 WARNUNG: 'openNav'/'closeNav' konnten nicht global gemacht werden. Debugger muss sie erraten.
+A83_DEBUG_V9 @ VM14273:165
+(anonymous) @ VM14273:167
+undefined
+landing/:3523 [SCROLL-TONE] ✓ Changed: dark → light at scroll 882px
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 959px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 3119px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 4286px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+landing/:3523 [SCROLL-TONE] ✓ Changed: light → dark at scroll 7594px
+landing/:3523 [SCROLL-TONE] ✓ Changed: dark → light at scroll 8035px
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 8363px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+landing/:4041 [A83-FIX-v9] WINDOW 'pointerdown' hat Burger-Klick abgefangen. STOPPE ALLES.
+landing/:3728 [NAV-MENU-v9] lockBody: Verwende ORIGINAL 'position: fixed' Logik.
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 0px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+VM14273:114 [SPION-2] 'click' auf CLOSE bei 8363px
+VM14273:115 -> 'closeNav()' wird aufgerufen. Erwartete Rückkehr-Position: 0px
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 8363px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+scroll
+remBlurUnlock @ landing/:4426
+onClose @ landing/:4474
+(anonymous) @ landing/:4494
+VM14273:120 -> CHECK (nach 800ms): Scroll ist jetzt bei 8363px.
+VM14273:123 -> FEHLER: Sprung beim Schließen! 'unlockBody' hat die Position 0px nicht wiederhergestellt.
+(anonymous) @ VM14273:123
+setTimeout
+closeClickListener @ VM14273:118
+landing/:3750 [NAV-MENU-v9] unlockBody: Verwende ORIGINAL 'restoreScroll' Logik.
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 9452px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 9453px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+landing/:4041 [A83-FIX-v9] WINDOW 'pointerdown' hat Burger-Klick abgefangen. STOPPE ALLES.
+landing/:3728 [NAV-MENU-v9] lockBody: Verwende ORIGINAL 'position: fixed' Logik.
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 0px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+landing/:4041 [A83-FIX-v9] WINDOW 'pointerdown' hat Burger-Klick abgefangen. STOPPE ALLES.
+VM14273:114 [SPION-2] 'click' auf CLOSE bei 9453px
+VM14273:115 -> 'closeNav()' wird aufgerufen. Erwartete Rückkehr-Position: 0px
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 9453px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+scroll
+remBlurUnlock @ landing/:4426
+onClose @ landing/:4474
+(anonymous) @ landing/:4494
+VM14273:120 -> CHECK (nach 800ms): Scroll ist jetzt bei 9453px.
+VM14273:123 -> FEHLER: Sprung beim Schließen! 'unlockBody' hat die Position 0px nicht wiederhergestellt.
+(anonymous) @ VM14273:123
+setTimeout
+closeClickListener @ VM14273:118
+landing/:3750 [NAV-MENU-v9] unlockBody: Verwende ORIGINAL 'restoreScroll' Logik.
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 10306px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 10804px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+landing/:3523 [SCROLL-TONE] ✓ Changed: light → dark at scroll 0px
+VM14273:138 [SPION-3] SCROLL-EVENT! Position ist jetzt: 0px
+(anonymous) @ VM14273:138
+setTimeout
+scrollSpy @ VM14273:137
+scroll
+remBlurUnlock @ landing/:4426
+onClose @ landing/:4474
+(anonymous) @ landing/:4494

@@ -1,0 +1,67 @@
+/* ===== A83 Burger = Wordmark Style — v13.6 ===== */
+:root{
+  /* Farbhooks aus Headspin UI */
+  --wm-on:  var(--hcl-brand-1, #fff); /* hell/aktiv = wie Wordmark */
+  --wm-dim: color-mix(in oklab, var(--hcl-brand-1, #fff) 35%, #000 65%); /* gedimmt */
+  --wm-gl1: var(--hcl-ruby-11, #ff3355);    /* Glitch 1 */
+  --wm-gl2: var(--hcl-glitch-9, #55eeff);   /* Glitch 2 */
+
+  /* easing aus deinem Nav-CSS */
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Click-Target & Grundlook */
+#nav-trigger.nav-toggle{
+  position: relative;
+  display: grid; place-items: center;
+  width: var(--burger-w, 36px); height: var(--burger-h, 36px);
+  background: transparent; border: 0; outline: none;
+  color: var(--wm-dim);
+  transition: color .28s var(--ease), filter .28s var(--ease), opacity .28s var(--ease), transform .18s var(--ease);
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* 3 Linien als ein Pseudo (mittlere Linie + Box-Shadows für oben/unten) */
+#nav-trigger.nav-toggle::before{
+  content:"";
+  position:absolute; left:8px; right:8px; top:50%;
+  height:2px; background: currentColor; border-radius: 2px;
+  transform: translateY(-50%);
+  box-shadow:
+    0 calc(-7px) 0 0 currentColor,  /* obere Linie */
+    0  calc( 7px) 0 0 currentColor; /* untere Linie */
+}
+
+/* Zustände: offen/öffnend → hell; geschlossen → gedimmt */
+html[data-nav-state="opening"] #nav-trigger.nav-toggle,
+html[data-nav-state="open"]    #nav-trigger.nav-toggle,
+#nav-trigger.nav-toggle.is-open,
+#nav-trigger.nav-toggle.wm-bright{
+  color: var(--wm-on);
+}
+html[data-nav-state="closing"] #nav-trigger.nav-toggle,
+html[data-nav-state="closed"]  #nav-trigger.nav-toggle{
+  color: var(--wm-dim);
+}
+
+/* Hover: wird hell + optionaler kurzer RGB-Pulse (per .wm-burst) */
+#nav-trigger.nav-toggle:hover{ color: var(--wm-on); }
+
+/* Glitch/Pulse */
+#nav-trigger.nav-toggle.wm-burst{
+  filter: drop-shadow(1px 0 var(--wm-gl1)) drop-shadow(-1px 0 var(--wm-gl2));
+  animation: a83-burger-jitter 420ms steps(12) both;
+}
+
+/* Kleine „Feelings“ beim Öffnen/Schließen (optional) */
+#nav-trigger.nav-toggle.is-anim      { transform: scale(1.04); }
+#nav-trigger.nav-toggle.is-recoiling { transform: scale(.96); }
+
+@keyframes a83-burger-jitter{
+  0%,100%{ transform: translateX(0) }
+  20%{ transform: translateX( 1px) }
+  40%{ transform: translateX(-1px) }
+  60%{ transform: translateX( 1px) }
+  80%{ transform: translateX(-1px) }
+}

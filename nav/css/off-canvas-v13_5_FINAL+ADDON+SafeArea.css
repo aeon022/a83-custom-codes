@@ -1,0 +1,1329 @@
+/* ===== Off-Canvas A83 — v13.5 + BURGER + WORDMARK + SCROLL-TONE ===== */
+:root{
+  --brand: var(--hcl-ruby-9,#e54666);
+  --card-bg: color-mix(in oklab,var(--brand) 12%, rgba(12,16,14,.82));
+  --card-bd: color-mix(in oklab,var(--brand) 32%, rgba(229,70,102,.28));
+  --dim: rgba(10,14,12,.55);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --t-burger: 350ms;
+  --t-card: 680ms;
+  --t-card-out: 420ms;
+  --t-backdrop-out: 320ms;
+  --t-close-gap: 60ms;
+
+  --radius: 20px;
+  --shadow: 0 12px 40px rgba(0,0,0,.35);
+
+  /* Wild Glitch */
+  --glitch-card-dur: 640ms;
+  --glitch-link-dur: 520ms;
+
+  /* Header */
+  --header-h: 52px;
+  
+  /* Wordmark & Burger Colors (adaptive) */
+  --nav-wordmark: var(--hcl-ruby-9, #e54666);
+  --nav-burger: var(--hcl-ruby-9, #e54666);
+}
+
+/* ===== SITE HEADER ===== */
+#site-header{ 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0;
+  z-index: 40; 
+  padding: 12px clamp(16px, 4vw, 32px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s var(--ease);
+}
+
+/* Tone-based colors */
+#site-header[data-tone="light"]{ 
+  --nav-wordmark: var(--hcl-brand-12, #0b0d0c); 
+  --nav-burger: var(--hcl-brand-12, #0b0d0c);
+}
+#site-header[data-tone="dark"]{ 
+  --nav-wordmark: var(--hcl-brand-1, #fff); 
+  --nav-burger: var(--hcl-brand-1, #fff);
+}
+
+/* ===== WORDMARK ===== */
+.brand-wordmark{
+  color: var(--nav-wordmark);
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  position: relative;
+  opacity: 0.65; /* dimmed by default */
+  transition: opacity 0.3s var(--ease), filter 0.2s var(--ease);
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.25));
+  cursor: pointer;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: opacity, filter;
+  white-space: wrap; /* PREVENT LINE BREAK */
+  display: inline-block; /* ensure proper rendering */
+}
+
+#site-header[data-tone="light"] .brand-wordmark{
+  filter: drop-shadow(0 0 1px rgba(255,255,255,.25));
+}
+
+/* Hover: full opacity + quick glitch */
+.brand-wordmark:hover{
+  opacity: 1;
+}
+.brand-wordmark:hover::before,
+.brand-wordmark:hover::after{
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0.6; /* reduced from 0.7 */
+  mix-blend-mode: screen;
+  white-space: wrap; /* prevent line break */
+}
+.brand-wordmark:hover::before{
+  color: #0ff;
+  animation: a83-wordmark-glitch-small 240ms steps(6) 1; /* smaller, faster */
+}
+.brand-wordmark:hover::after{
+  color: #f0f;
+  animation: a83-wordmark-glitch-alt-small 240ms steps(6) 1; /* smaller, faster */
+}
+
+@keyframes a83-wordmark-glitch-small{
+  0%{ transform: translate(0,0); }
+  25%{ transform: translate(1px,0); } /* reduced from 2px */
+  50%{ transform: translate(-0.5px,0); } /* reduced from -1px */
+  75%{ transform: translate(0.5px,0); } /* reduced from 1px */
+  100%{ transform: translate(0,0); }
+}
+@keyframes a83-wordmark-glitch-alt-small{
+  0%{ transform: translate(0,0); }
+  25%{ transform: translate(-1px,0); } /* reduced from -2px */
+  50%{ transform: translate(0.5px,0); } /* reduced from 1px */
+  75%{ transform: translate(-0.5px,0); } /* reduced from -1px */
+  100%{ transform: translate(0,0); }
+}
+
+/* Initial load glitch (triggered by JS via .wordmark-init class) */
+.brand-wordmark.wordmark-init{
+  animation: a83-wordmark-init 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes a83-wordmark-init{
+  0%{ 
+    opacity: 0; 
+    transform: translateY(-4px) scale(0.96); 
+    filter: blur(4px) saturate(0.5);
+  }
+  40%{
+    opacity: 0.4;
+    filter: blur(2px) saturate(1.2);
+  }
+  60%{
+    opacity: 1;
+    filter: saturate(1.4) contrast(1.1);
+  }
+  100%{ 
+    opacity: 0.65; 
+    transform: none; 
+    filter: none;
+  }
+}
+
+/* Add glitch pseudos during init */
+.brand-wordmark.wordmark-init::before,
+.brand-wordmark.wordmark-init::after{
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+.brand-wordmark.wordmark-init::before{
+  color: #0ff;
+  animation: a83-init-shift 620ms steps(12) 1;
+}
+.brand-wordmark.wordmark-init::after{
+  color: #f0f;
+  animation: a83-init-shift-alt 620ms steps(12) 1;
+}
+
+@keyframes a83-init-shift{
+  0%,100%{ transform: translate(0,0); opacity: 0.85; }
+  15%{ transform: translate(3px,-1px); }
+  30%{ transform: translate(-2px,1px); }
+  45%{ transform: translate(2px,0); }
+  60%{ transform: translate(-3px,0); }
+  75%{ transform: translate(1px,-1px); }
+  90%{ opacity: 0; }
+}
+@keyframes a83-init-shift-alt{
+  0%,100%{ transform: translate(0,0); opacity: 0.85; }
+  15%{ transform: translate(-3px,1px); }
+  30%{ transform: translate(2px,-1px); }
+  45%{ transform: translate(-2px,0); }
+  60%{ transform: translate(3px,0); }
+  75%{ transform: translate(-1px,1px); }
+  90%{ opacity: 0; }
+}
+
+/* ===== BURGER ===== */
+:root{
+  --a83-burger-size: 28px;
+  --a83-burger-thick: 2px;
+  --a83-burger-gap: 6px;
+  --a83-burger-dur: 320ms;
+  --a83-ease: cubic-bezier(.2,.8,.2,1);
+  --burger-reset-dur: 420ms;
+}
+
+.burger-home-slot, .burger-slot{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#nav-trigger, #a83-burger, .a83-burger, .nav-toggle{
+  all: unset;
+  display: inline-grid;
+  place-items: center;
+  width: var(--a83-burger-size);
+  height: var(--a83-burger-size);
+  cursor: pointer;
+  color: var(--nav-burger);
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.25));
+  opacity: 0.65; /* dimmed by default */
+  transition: opacity 0.3s var(--ease), filter 0.2s var(--ease);
+  position: relative;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: opacity, filter, transform;
+}
+
+#site-header[data-tone="light"] #nav-trigger,
+#site-header[data-tone="light"] .a83-burger{
+  filter: drop-shadow(0 0 1px rgba(255,255,255,.25));
+}
+
+/* Hover: full opacity + quick glitch */
+#nav-trigger:hover, .a83-burger:hover, .nav-toggle:hover{
+  opacity: 1;
+  animation: a83-burger-hover-shake 420ms steps(16) 1;
+}
+
+@keyframes a83-burger-hover-shake{
+  0%{ transform: translate(0, 0) rotate(0deg); }
+  10%{ transform: translate(1px, -1px) rotate(1deg); }
+  20%{ transform: translate(-1px, 1px) rotate(-1deg); }
+  30%{ transform: translate(1px, 0) rotate(0.5deg); }
+  40%{ transform: translate(-1px, -1px) rotate(-0.5deg); }
+  50%{ transform: translate(1px, 1px) rotate(1deg); }
+  60%{ transform: translate(-1px, 0) rotate(-1deg); }
+  70%{ transform: translate(1px, -1px) rotate(0.5deg); }
+  80%{ transform: translate(-1px, 1px) rotate(-0.5deg); }
+  90%{ transform: translate(0, -1px) rotate(0deg); }
+  100%{ transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Burger hover RGB glitch */
+#nav-trigger:hover::before, .a83-burger:hover::before,
+#nav-trigger:hover::after, .a83-burger:hover::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: -1;
+}
+
+#nav-trigger:hover::before, .a83-burger:hover::before{
+  box-shadow: 2px 0 0 rgba(0,255,255,.7) inset;
+  animation: a83-burger-hover-edge 420ms steps(14) 1;
+}
+
+#nav-trigger:hover::after, .a83-burger:hover::after{
+  box-shadow: -2px 0 0 rgba(255,0,128,.7) inset;
+  animation: a83-burger-hover-edge-alt 420ms steps(14) 1;
+}
+
+@keyframes a83-burger-hover-edge{
+  0%,100%{ transform: translateX(0); opacity: 0; }
+  20%{ transform: translateX(2px); opacity: 0.8; }
+  40%{ transform: translateX(-1px); opacity: 0.9; }
+  60%{ transform: translateX(2px); opacity: 0.7; }
+  80%{ transform: translateX(-1px); opacity: 0.8; }
+}
+
+@keyframes a83-burger-hover-edge-alt{
+  0%,100%{ transform: translateX(0); opacity: 0; }
+  20%{ transform: translateX(-2px); opacity: 0.8; }
+  40%{ transform: translateX(1px); opacity: 0.9; }
+  60%{ transform: translateX(-2px); opacity: 0.7; }
+  80%{ transform: translateX(1px); opacity: 0.8; }
+}
+
+/* Burger box structure */
+.a83-burger-box{
+  position: relative;
+  width: 24px;
+  height: 16px;
+}
+
+.a83-burger-inner,
+.a83-burger-inner::before,
+.a83-burger-inner::after{
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--a83-burger-thick);
+  background-color: currentColor;
+  border-radius: 2px;
+  content: "";
+  transition: transform var(--a83-burger-dur) var(--a83-ease),
+              opacity 160ms var(--a83-ease);
+  will-change: transform, opacity;
+}
+
+.a83-burger-inner{ 
+  top: 50%; 
+  transform: translateY(-50%); 
+}
+.a83-burger-inner::before{ 
+  top: calc(50% - var(--a83-burger-gap)); 
+}
+.a83-burger-inner::after{ 
+  top: calc(50% + var(--a83-burger-gap)); 
+}
+
+/* Open state (X shape) */
+#nav-trigger[aria-expanded="true"] .a83-burger-inner{
+  transform: translateY(-50%) rotate(45deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::before{
+  transform: translateY(calc(var(--a83-burger-gap))) rotate(-90deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::after{
+  transform: translateY(calc(-1 * var(--a83-burger-gap))) rotate(-90deg);
+}
+
+/* Active feedback */
+#nav-trigger:active, .a83-burger:active{ 
+  transform: scale(.97); 
+}
+
+/* Initial load glitch for burger */
+#nav-trigger.burger-init, .a83-burger.burger-init{
+  animation: a83-burger-init 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 240ms; /* slight delay after wordmark */
+}
+
+@keyframes a83-burger-init{
+  0%{ 
+    opacity: 0; 
+    transform: translateY(-4px) scale(0.94) rotate(-2deg); 
+    filter: blur(3px);
+  }
+  35%{
+    opacity: 0.4;
+    filter: blur(1px) saturate(1.3);
+  }
+  55%{
+    opacity: 1;
+    filter: saturate(1.5) contrast(1.15);
+  }
+  100%{ 
+    opacity: 0.65; 
+    transform: none; 
+    filter: none;
+  }
+}
+
+/* Glitch effect on burger init */
+#nav-trigger.burger-init::after, .a83-burger.burger-init::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow:
+    2px 0 0 var(--hcl-ruby-11, #ff3b6e) inset,
+    -2px 0 0 var(--hcl-glitch-9, #00f0ff) inset;
+  animation: a83-burger-init-edge 640ms steps(14) both;
+}
+
+@keyframes a83-burger-init-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); opacity: 0.9; }
+  20%{ transform: translateX(2px) skewX(0.4deg); }
+  40%{ transform: translateX(-2px) skewX(-0.4deg); }
+  60%{ transform: translateX(2px) skewX(0.3deg); }
+  80%{ transform: translateX(-1px) skewX(-0.2deg); }
+  95%{ opacity: 0; }
+}
+
+/* Recoil animation when closing */
+#nav-trigger.is-recoiling, .nav-toggle.is-recoiling{
+  animation: a83-burger-recoil var(--burger-reset-dur) var(--a83-ease) both;
+}
+
+@keyframes a83-burger-recoil{
+  0%{ transform: scale(1) rotate(0deg); filter: none; }
+  22%{ transform: scale(.94) rotate(-.6deg); filter: saturate(1.1) contrast(1.05); }
+  60%{ transform: scale(1.03) rotate(.4deg); }
+  100%{ transform: scale(1) rotate(0deg); }
+}
+
+#nav-trigger.is-recoiling::after, .nav-toggle.is-recoiling::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow:
+    2px 0 0 var(--hcl-ruby-11, #ff3b6e) inset,
+    -2px 0 0 var(--hcl-glitch-9, #00f0ff) inset;
+  animation: a83-burger-edge var(--burger-reset-dur) steps(14) both;
+}
+
+@keyframes a83-burger-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%{ transform: translateX(2px) skewX(.35deg); }
+  50%{ transform: translateX(-2px) skewX(-.35deg); }
+  75%{ transform: translateX(1px) skewX(.2deg); }
+}
+
+/* ===== OVERLAY / BACKDROP ===== */
+.a83-burger-box{
+  position: relative;
+  width: 24px;
+  height: 16px;
+}
+
+.a83-burger-inner,
+.a83-burger-inner::before,
+.a83-burger-inner::after{
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--a83-burger-thick);
+  background-color: currentColor;
+  border-radius: 2px;
+  content: "";
+  transition: transform var(--a83-burger-dur) var(--a83-ease),
+              opacity 160ms var(--a83-ease);
+  will-change: transform, opacity;
+}
+
+.a83-burger-inner{ 
+  top: 50%; 
+  transform: translateY(-50%); 
+}
+.a83-burger-inner::before{ 
+  top: calc(50% - var(--a83-burger-gap)); 
+}
+.a83-burger-inner::after{ 
+  top: calc(50% + var(--a83-burger-gap)); 
+}
+
+/* Open state (X shape) */
+#nav-trigger[aria-expanded="true"] .a83-burger-inner{
+  transform: translateY(-50%) rotate(45deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::before{
+  transform: translateY(calc(var(--a83-burger-gap))) rotate(-90deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::after{
+  transform: translateY(calc(-1 * var(--a83-burger-gap))) rotate(-90deg);
+}
+
+/* Active feedback */
+#nav-trigger:active, .a83-burger:active{ 
+  transform: scale(.97); 
+}
+
+/* Initial load glitch for burger */
+#nav-trigger.burger-init, .a83-burger.burger-init{
+  animation: a83-burger-init 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 240ms; /* slight delay after wordmark */
+}
+
+@keyframes a83-burger-init{
+  0%{ 
+    opacity: 0; 
+    transform: translateY(-4px) scale(0.94) rotate(-2deg); 
+    filter: blur(3px);
+  }
+  35%{
+    opacity: 0.4;
+    filter: blur(1px) saturate(1.3);
+  }
+  55%{
+    opacity: 1;
+    filter: saturate(1.5) contrast(1.15);
+  }
+  100%{ 
+    opacity: 0.65; 
+    transform: none; 
+    filter: none;
+  }
+}
+
+/* Glitch effect on burger init */
+#nav-trigger.burger-init::after, .a83-burger.burger-init::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow:
+    2px 0 0 var(--hcl-ruby-11, #ff3b6e) inset,
+    -2px 0 0 var(--hcl-glitch-9, #00f0ff) inset;
+  animation: a83-burger-init-edge 640ms steps(14) both;
+}
+
+@keyframes a83-burger-init-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); opacity: 0.9; }
+  20%{ transform: translateX(2px) skewX(0.4deg); }
+  40%{ transform: translateX(-2px) skewX(-0.4deg); }
+  60%{ transform: translateX(2px) skewX(0.3deg); }
+  80%{ transform: translateX(-1px) skewX(-0.2deg); }
+  95%{ opacity: 0; }
+}
+
+/* Recoil animation when closing */
+#nav-trigger.is-recoiling, .nav-toggle.is-recoiling{
+  animation: a83-burger-recoil var(--burger-reset-dur) var(--a83-ease) both;
+}
+
+@keyframes a83-burger-recoil{
+  0%{ transform: scale(1) rotate(0deg); filter: none; }
+  22%{ transform: scale(.94) rotate(-.6deg); filter: saturate(1.1) contrast(1.05); }
+  60%{ transform: scale(1.03) rotate(.4deg); }
+  100%{ transform: scale(1) rotate(0deg); }
+}
+
+#nav-trigger.is-recoiling::after, .nav-toggle.is-recoiling::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow:
+    2px 0 0 var(--hcl-ruby-11, #ff3b6e) inset,
+    -2px 0 0 var(--hcl-glitch-9, #00f0ff) inset;
+  animation: a83-burger-edge var(--burger-reset-dur) steps(14) both;
+}
+
+@keyframes a83-burger-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%{ transform: translateX(2px) skewX(.35deg); }
+  50%{ transform: translateX(-2px) skewX(-.35deg); }
+  75%{ transform: translateX(1px) skewX(.2deg); }
+}
+
+/* ===== OVERLAY / BACKDROP ===== */
+#nav-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  pointer-events: none;
+  opacity: 0;
+  isolation: isolate;
+}
+
+#nav-overlay::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--dim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  opacity: 0;
+  transition: opacity var(--t-backdrop-out) var(--ease);
+  pointer-events: none;
+}
+
+#nav-overlay[aria-hidden="false"]{ 
+  display: block; 
+  pointer-events: auto; 
+  opacity: 1; 
+}
+
+html[data-nav-state="opening"] #nav-overlay::before,
+html[data-nav-state="open"] #nav-overlay::before{
+  opacity: 1;
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+html[data-nav-state="closing"] #nav-overlay::before{
+  transition-delay: calc(var(--t-card-out) + var(--t-close-gap));
+  opacity: 0;
+}
+
+/* ===== CARD ===== */
+#nav-overlay .nav-card{
+  position: fixed;
+  top: max(var(--header-h, 52px), clamp(12px, 2vw, 24px));
+  right: clamp(12px, 2vw, 24px);
+  width: min(560px, 92vw);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  border: 1px solid var(--card-bd);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  -webkit-backdrop-filter: saturate(120%);
+  backdrop-filter: saturate(120%);
+  box-shadow: var(--shadow);
+  z-index: 2;
+  will-change: transform, opacity, filter;
+  
+  --from-x: 8px;
+  --from-y: -6px;
+  --from-scale: .94;
+  
+  opacity: 0;
+  transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale));
+  filter: blur(6px);
+  transition:
+    transform var(--t-card) var(--ease) var(--t-burger),
+    opacity var(--t-card) var(--ease) var(--t-burger),
+    filter var(--t-card) var(--ease) var(--t-burger);
+}
+
+#nav-overlay .nav-card.card-primed{ 
+  transition: none !important; 
+}
+
+html[data-nav-state="opening"] #nav-overlay .nav-card,
+html[data-nav-state="open"] #nav-overlay .nav-card{ 
+  opacity: 1; 
+  transform: none; 
+  filter: none; 
+}
+
+html[data-nav-state="closing"] #nav-overlay .nav-card{
+  transition-delay: 0ms;
+  transition-duration: var(--t-card-out);
+  transition-timing-function: var(--ease);
+  opacity: 0;
+  transform: translate(6px,-4px) scale(.965);
+  filter: blur(4px) saturate(1.05);
+  overflow: hidden;
+}
+
+/* Watermark logo in card center */
+#nav-overlay .nav-card::after{
+  content:"";
+  position:absolute;
+  left:50%; top:50%;
+  transform: translate(-50%, -50%) scale(var(--wm-scale));
+  width: var(--wm-size);
+  aspect-ratio: 1 / 1;                  /* sauberes Quadrat */
+  background-image: url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  opacity: var(--wm-opacity), .08; 
+  filter: blur(var(--wm-blur)) saturate(1.05);   /* optional minimal */
+  mix-blend-mode: screen;                        /* „durchscheinen“ auf dunklem Grund */
+  pointer-events:none;
+  z-index: 1; /* unter Head/Content (die liegen höher, z.B. z-index:4 im .nav-head) */
+}
+
+/* Card glitch pseudos */
+#nav-overlay .nav-card::before{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+
+html[data-nav-state="closing"] #nav-overlay .nav-card::before{
+  opacity: .55;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.10) 0,
+      rgba(255,255,255,.10) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+  animation: a83-card-scan var(--t-card-out) linear both;
+}
+
+@keyframes a83-card-scan{
+  0%{ transform: translateY(-60%); }
+  100%{ transform: translateY(60%); }
+}
+
+/* ===== CARD HEAD & CLOSE ===== */
+#nav-overlay .nav-head{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid color-mix(in oklab,var(--brand) 20%, transparent);
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--card-bg);
+}
+
+#nav-overlay .nav-head h1{
+  margin: 0;
+  line-height: 1.1;
+  font-size: 18px;
+  letter-spacing: .02em;
+}
+
+#nav-overlay #nav-close-slot,
+#nav-overlay .nav-close-slot{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  justify-self: end !important;
+  width: auto !important;
+  pointer-events: auto;
+  min-width: var(--burger-w, 36px);
+}
+
+#nav-overlay .nav-close-btn{
+  display: grid;
+  place-items: center;
+  width: var(--burger-w, 36px);
+  height: var(--burger-h, 36px);
+  padding: 0;
+  margin: 0 0 0 auto;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .12s ease, opacity .18s var(--ease);
+  position: relative;
+}
+
+#nav-overlay .nav-close-btn:active{ 
+  transform: scale(.96); 
+}
+
+/* X hover glitch */
+#nav-overlay .nav-close-btn:hover::before,
+#nav-overlay .nav-close-btn:hover::after{
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+#nav-overlay .nav-close-btn:hover::before{
+  color: #0ff;
+  animation: a83-x-jitter 280ms steps(8) 1;
+}
+
+#nav-overlay .nav-close-btn:hover::after{
+  color: #f0f;
+  animation: a83-x-jitter-2 280ms steps(8) 1;
+}
+
+@keyframes a83-x-jitter{
+  0%{ transform: translateX(0); }
+  25%{ transform: translateX(2px); }
+  50%{ transform: translateX(-1px); }
+  75%{ transform: translateX(1px); }
+  100%{ transform: translateX(0); }
+}
+
+@keyframes a83-x-jitter-2{
+  0%{ transform: translateX(0); }
+  25%{ transform: translateX(-2px); }
+  50%{ transform: translateX(1px); }
+  75%{ transform: translateX(-1px); }
+  100%{ transform: translateX(0); }
+}
+
+/* X hidden initially */
+#nav-overlay .nav-close-btn.x-hidden{
+  opacity: 0;
+  transform: scale(.9) translateY(-2px);
+  filter: blur(2px);
+  transition: opacity 180ms var(--ease), transform 220ms var(--ease), filter 220ms var(--ease);
+}
+
+/* X glitch on appear */
+#nav-overlay .nav-close-btn.x-glitch::before,
+#nav-overlay .nav-close-btn.x-glitch::after{
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 2;
+  opacity: 0.9;
+}
+
+#nav-overlay .nav-close-btn.x-glitch::before{
+  color: #0ff;
+  animation: a83-x-jitter 420ms steps(10) both;
+}
+
+#nav-overlay .nav-close-btn.x-glitch::after{
+  color: #f0f;
+  animation: a83-x-jitter-2 420ms steps(10) both;
+}
+
+/* ===== MENU & STAGGER ===== */
+#nav-overlay .nav-menu{
+  padding: 12px 16px 18px;
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+#nav-overlay .nav-menu > a,
+#nav-overlay .nav-menu > .nav-link{
+  text-decoration: none;
+  color: var(--hs-text-contrast,#fff);
+  font-size: clamp(18px,2.4vw,22px);
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(2px);
+  transition: opacity .42s var(--ease), transform .42s var(--ease), filter .42s var(--ease);
+  position: relative;
+  padding-left: 28px;
+}
+
+html[data-nav-state="open"] #nav-overlay .nav-menu > a,
+html[data-nav-state="open"] #nav-overlay .nav-menu > .nav-link{
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Stagger delays */
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(1){ transition-delay: .24s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(2){ transition-delay: .32s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(3){ transition-delay: .40s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(4){ transition-delay: .48s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(5){ transition-delay: .56s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(6){ transition-delay: .64s; }
+
+html[data-nav-state="closing"] #nav-overlay .nav-menu > *{
+  transition: opacity .24s var(--ease), transform .24s var(--ease), filter .24s var(--ease);
+  opacity: 0;
+  transform: translateY(4px);
+  filter: blur(2px);
+}
+
+/* Link hover glitch - FREAKY VERSION */
+#nav-overlay .nav-menu > a:hover,
+#nav-overlay .nav-menu > .nav-link:hover{
+  text-shadow: 
+    2px 0 0 #0ff,
+    -2px 0 0 #f0f,
+    0 0 12px rgba(255,255,255,.35);
+}
+
+#nav-overlay .nav-menu > a:hover::before,
+#nav-overlay .nav-menu > .nav-link:hover::before,
+#nav-overlay .nav-menu > a:hover::after,
+#nav-overlay .nav-menu > .nav-link:hover::after{
+  content: attr(data-title);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: .85; /* increased from .75 */
+  mix-blend-mode: screen;
+  filter: saturate(1.5) contrast(1.1);
+}
+
+#nav-overlay .nav-menu > a:hover::before,
+#nav-overlay .nav-menu > .nav-link:hover::before{
+  color: #0ff;
+  animation: a83-link-jitter-freaky 380ms steps(14) infinite; /* infinite loop! */
+}
+
+#nav-overlay .nav-menu > a:hover::after,
+#nav-overlay .nav-menu > .nav-link:hover::after{
+  color: #f0f;
+  animation: a83-link-jitter-freaky-alt 380ms steps(14) infinite; /* infinite loop! */
+}
+
+@keyframes a83-link-jitter-freaky{
+  0%{ transform: translate(0,0) skewX(0deg); }
+  10%{ transform: translate(3px,-1px) skewX(2deg); }
+  20%{ transform: translate(-4px,1px) skewX(-3deg); }
+  30%{ transform: translate(2px,1px) skewX(1deg); }
+  40%{ transform: translate(-3px,-1px) skewX(-2deg); }
+  50%{ transform: translate(4px,0) skewX(3deg); }
+  60%{ transform: translate(-2px,1px) skewX(-1deg); }
+  70%{ transform: translate(3px,-1px) skewX(2deg); }
+  80%{ transform: translate(-4px,0) skewX(-3deg); }
+  90%{ transform: translate(2px,1px) skewX(1deg); }
+  100%{ transform: translate(0,0) skewX(0deg); }
+}
+
+@keyframes a83-link-jitter-freaky-alt{
+  0%{ transform: translate(0,0) skewX(0deg); }
+  10%{ transform: translate(-3px,1px) skewX(-2deg); }
+  20%{ transform: translate(4px,-1px) skewX(3deg); }
+  30%{ transform: translate(-2px,-1px) skewX(-1deg); }
+  40%{ transform: translate(3px,1px) skewX(2deg); }
+  50%{ transform: translate(-4px,0) skewX(-3deg); }
+  60%{ transform: translate(2px,-1px) skewX(1deg); }
+  70%{ transform: translate(-3px,1px) skewX(-2deg); }
+  80%{ transform: translate(4px,0) skewX(3deg); }
+  90%{ transform: translate(-2px,-1px) skewX(-1deg); }
+  100%{ transform: translate(0,0) skewX(0deg); }
+}
+
+/* Opening glitch for links */
+#nav-overlay .nav-menu.glitch-once .nav-link::before,
+#nav-overlay .nav-menu.glitch-once .nav-link::after,
+#nav-overlay .nav-menu.glitch-once > a::before,
+#nav-overlay .nav-menu.glitch-once > a::after{
+  content: attr(data-title);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: .88;
+  mix-blend-mode: screen;
+  filter: saturate(1.35);
+}
+
+#nav-overlay .nav-menu.glitch-once .nav-link::before,
+#nav-overlay .nav-menu.glitch-once > a::before{
+  color: #0ff;
+  animation: a83-link-jitter 460ms steps(10) both;
+}
+
+#nav-overlay .nav-menu.glitch-once .nav-link::after,
+#nav-overlay .nav-menu.glitch-once > a::after{
+  color: #f0f;
+  animation: a83-link-jitter-alt 460ms steps(10) both;
+}
+
+/* Wild bursts */
+#nav-overlay .nav-menu .g1,
+#nav-overlay .nav-menu .g2,
+#nav-overlay .nav-menu .g3{
+  text-shadow:
+    1px 0 0 #0ff,
+    -1px 0 0 #f0f,
+    0 0 10px rgba(255,255,255,.18);
+  animation: a83-link-flicker 280ms steps(12) 2;
+  filter: saturate(1.25) contrast(1.05);
+}
+
+@keyframes a83-link-flicker{
+  0%{ opacity: 1; }
+  40%{ opacity: .6; }
+  55%{ opacity: 1; }
+  70%{ opacity: .7; }
+  100%{ opacity: 1; }
+}
+
+/* ===== HINT ===== */
+#nav-overlay .nav-hint{
+  position: fixed !important;
+  left: clamp(12px, 2vw, 24px) !important;
+  bottom: clamp(12px, 2vh, 24px) !important;
+  
+  display: inline-grid !important;
+  grid-auto-flow: column !important;
+  grid-template-columns: auto minmax(0,1fr) !important;
+  align-items: baseline !important;
+  column-gap: 0 !important;
+  
+  width: max-content !important;
+  max-width: calc(100vw - 32px) !important;
+  
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  
+  pointer-events: none !important;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  z-index: 10;
+}
+
+#nav-overlay.hint-visible .nav-hint{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#nav-overlay .nav-hint .cmd{
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Glitch effects */
+#nav-overlay .nav-card.glitch,
+#nav-overlay .nav-card.glitch-strong{
+  animation: a83-card-pulse var(--glitch-card-dur) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes a83-card-pulse{
+  0%{ filter: saturate(1); }
+  30%{ filter: saturate(1.4) contrast(1.1); }
+  60%{ filter: saturate(1.5) contrast(1.15) hue-rotate(2deg); }
+  100%{ filter: saturate(1); }
+}
+
+/* Slice glitch */
+.gl-slices{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.gl-slice{
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, 
+    rgba(0,255,255,0.15) 0%, 
+    transparent 50%, 
+    rgba(255,0,128,0.15) 100%);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+@keyframes a83-slice-shift{
+  0%,100%{ transform: translateX(0); }
+  25%{ transform: translateX(4px); }
+  50%{ transform: translateX(-3px); }
+  75%{ transform: translateX(2px); }
+}
+
+@keyframes a83-slice-skew{
+  0%,100%{ transform: skewX(0deg) translateX(0); }
+  25%{ transform: skewX(0.5deg) translateX(3px); }
+  50%{ transform: skewX(-0.5deg) translateX(-4px); }
+  75%{ transform: skewX(0.3deg) translateX(2px); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  #nav-overlay .nav-card.glitch,
+  #nav-overlay .nav-card.glitch-strong,
+  #nav-overlay .nav-card .gl-slices,
+  #nav-overlay .nav-menu.glitch-once::before,
+  #nav-overlay .nav-menu.glitch-once::after,
+  .brand-wordmark.wordmark-init,
+  #nav-trigger.burger-init,
+  .a83-burger.burger-init{
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .a83-burger-inner,
+  .a83-burger-inner::before,
+  .a83-burger-inner::after{
+    transition: none !important;
+  }
+}
+
+/* Body lock */
+html.nav-lock{
+  overflow: hidden;
+  padding-right: var(--sbw, 0);
+}
+
+.nav-fixed{
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+
+/* Safe-Area für Safari/iOS: schiebt den Hint aus der Status-/Toolbar */
+:root{
+  --safe-left: 0px;
+  --safe-bottom: 0px;
+}
+/* Legacy iOS 11 */
+@supports (padding: constant(safe-area-inset-bottom)) {
+  :root{
+    --safe-left:   constant(safe-area-inset-left);
+    --safe-bottom: constant(safe-area-inset-bottom);
+  }
+}
+/* Moderne iOS/Safari */
+@supports (padding: env(safe-area-inset-bottom)) {
+  :root{
+    --safe-left:   env(safe-area-inset-left);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Override: Hint-Position mit Safe-Area addieren */
+#nav-overlay .nav-hint{
+  left:   calc(clamp(12px, 2vw, 24px) + var(--safe-left)) !important;
+  bottom: calc(clamp(32px, 2vh, 24px) + var(--safe-bottom) + 6px) !important;
+}
+
+
+
+/* ===== BRAND WATERMARK (from menucard-brand-watermark-addon-v1.css) ===== */
+/* Brand Watermark Menükarte v1 */
+#nav-overlay .nav-card{ position:relative; overflow:hidden; }
+#nav-overlay .nav-card #nav-brandmark{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity:.28; mix-blend-mode: screen;
+  /* Logo als Maske – KORREKTER PFAD */
+  -webkit-mask: url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg') no-repeat center / min(72%, 520px) auto;
+          mask: url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg') no-repeat center / min(72%, 520px) auto;
+  /* leichte Bühne unter der Maske */
+  background:
+    radial-gradient(40% 40% at 50% 46%, rgba(255,255,255,.16), transparent 62%),
+    conic-gradient(from 0deg, rgba(255,255,255,.08), transparent 70%);
+  transform: translateZ(0);
+  transition: opacity .45s var(--ease), transform .45s var(--ease), filter .45s var(--ease);
+}
+
+/* Opening: etwas heller + mini Zoom */
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark{
+  opacity:.14; transform: scale(1.02);
+}
+
+/* Closing: smooth ausfaden + leichter Crunch */
+html[data-nav-state="closing"] #nav-overlay .nav-card #nav-brandmark{
+  opacity:0; transform: scale(.985);
+  filter: blur(1px) saturate(1.05);
+}
+
+/* Extra-Glitch-Pulse synchron zu Card-Glitches */
+#nav-overlay .nav-card #nav-brandmark::before,
+#nav-overlay .nav-card #nav-brandmark::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0;
+}
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark::before{
+  opacity:.35; mix-blend-mode: screen;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.10) 0 1px, transparent 2px 4px);
+  animation: wm-scan 520ms linear both;
+}
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark::after{
+  opacity:.8; box-shadow:
+    2px 0 0 rgba(0,255,255,.45) inset,
+   -2px 0 0 rgba(255,0,128,.40) inset;
+  animation: wm-edge 420ms steps(12) both;
+}
+@keyframes wm-scan{ 0%{transform:translateY(-70%)} 100%{transform:translateY(70%)} }
+@keyframes wm-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%{ transform: translateX(2px) skewX(.35deg); }
+  50%{ transform: translateX(-2px) skewX(-.35deg); }
+  75%{ transform: translateX(1px) skewX(.2deg); }
+}
+
+/* Fallback: falls Mask nicht supported → feiner SVG-Background */
+@supports not (mask: url('#')){
+  #nav-overlay .nav-card #nav-brandmark{
+    background:
+      url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg') no-repeat center / min(72%, 520px) auto,
+      radial-gradient(40% 40% at 50% 46%, rgba(255,255,255,.16), transparent 62%);
+    opacity:.06;
+  }
+}
+
+/* === A83 Nav-Card Anti-Center Hardening ===================== */
+
+/* Falls Overlay vom Theme/Builder irgendwo als Flex/Grid zentriert wurde: entwaffnen */
+#nav-overlay{
+  display: block !important;
+  align-items: normal !important;
+  justify-content: normal !important;
+  place-items: initial !important;
+  text-align: initial !important;
+}
+
+/* Karte *hart* oben rechts pinnen – unabhängig von Eltern-Layout */
+#nav-overlay > .nav-card{
+  position: fixed !important;
+  top: max(var(--header-h, 52px), clamp(12px, 2vw, 24px)) !important;
+  right: clamp(12px, 2vw, 24px) !important;
+  left: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  transform-origin: top right !important;
+}
+
+/* Kein „Center durch Containerbreite“: Sicherheitsnetz bei Breakpoint-Regeln */
+#nav-overlay > .nav-card{
+  max-width: none !important;   /* Breite kommt von width/min() weiter oben */
+}
+
+/* Brandmark ist reines Deko-Layer unter Inhalt */
+#nav-overlay .nav-card{ position: relative !important; overflow: hidden !important; }
+#nav-overlay .nav-card #nav-brandmark{
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Inhalt der Karte liegt sicher über dem Brandmark */
+#nav-overlay .nav-card > *:not(#nav-brandmark){
+  position: relative;
+  z-index: 1;
+}
+
+/* Falls irgendwo „text-align:center“ reinfunkt (Themes lieben das): neutralisieren */
+#nav-overlay .nav-head,
+#nav-overlay .nav-menu{
+  text-align: initial !important;
+  justify-items: initial !important;
+  justify-content: initial !important;
+}
+
+/* Für den (seltenen) Fall, dass .nav-card vom Builder als Flex/Grid gesetzt wurde: */
+#nav-overlay .nav-card{
+  display: block !important; /* verhindert zentrierende place-items/justify-content */
+}
+
+
+#nav-overlay .nav-card{
+  isolation: isolate; /* verhindert, dass mix-blend-mode Eltern beeinflusst */
+}
+#nav-overlay .nav-card #nav-brandmark{
+  opacity: .06; /* subtler = weniger Risiko für Theme-Styles mit blend-Interaktionen */
+}
+
+/* === A83 NAV-CARD: HARD TOP-RIGHT ANCHOR (kills BD center rules) === */
+#nav-overlay .nav-card{
+  position: fixed !important;
+
+  /* alles zurücksetzen und bewusst oben rechts setzen */
+  inset: auto auto auto auto !important;        /* reset */
+  top: max(var(--header-h,52px), clamp(12px,2vw,24px)) !important;
+  right: clamp(12px, 2vw, 24px) !important;
+  bottom: auto !important;
+  left: auto !important;
+
+  /* jedes "zentriere mich" killen */
+  margin: 0 !important;
+  max-width: none !important;                    /* falls BD ein max-width setzt */
+  transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale)); /* deine Startwerte bleiben */
+  transform-origin: top right !important;
+}
+
+/* Falls ein zentrierender Inline-Style reingrätscht (left:50% / translateX(-50%)) */
+#nav-overlay .nav-card[style*="left: 50%"]{
+  left: auto !important;
+  transform: none !important;
+}
+
+/* Sicherheitsnetz: logische Properties für RTL/LTR */
+#nav-overlay .nav-card{
+  inset-inline-end: clamp(12px, 2vw, 24px) !important;
+  inset-inline-start: auto !important;
+}
+
+/* Nur falls ein elterliches BD-Wrapper-Element versucht, Kinder zu zentrieren */
+#nav-overlay{
+  display: block !important;        /* vermeidet grid/flex-centering von Kindern */
+  place-items: initial !important;
+  justify-items: initial !important;
+  align-items: initial !important;
+}
+
+
+
+
+
+/* === A83 Tone Bridge — koppelt Wordmark & Burger an data-tone ================= */
+
+/* Default-Werte (falls nichts gesetzt) */
+#site-header{
+  --nav-wordmark: var(--hcl-brand-1, #fff);
+  --nav-burger:   var(--hcl-brand-1, #fff);
+}
+
+/* Daten-Ton auf dem Header selbst */
+#site-header[data-tone="light"]{
+  --nav-wordmark: var(--hcl-brand-12, #0b0d0c);
+  --nav-burger:   var(--hcl-brand-12, #0b0d0c);
+}
+#site-header[data-tone="dark"]{
+  --nav-wordmark: var(--hcl-brand-1, #fff);
+  --nav-burger:   var(--hcl-brand-1, #fff);
+}
+
+/* Root-Fallback: falls der Builder den Header austauscht, ziehen wir vom <html> */
+html[data-tone="light"] #site-header{
+  --nav-wordmark: var(--hcl-brand-12, #0b0d0c);
+  --nav-burger:   var(--hcl-brand-12, #0b0d0c);
+}
+html[data-tone="dark"] #site-header{
+  --nav-wordmark: var(--hcl-brand-1, #fff);
+  --nav-burger:   var(--hcl-brand-1, #fff);
+}
+
+/* Wordmark: Text + evtl. SVG */
+.brand-wordmark,
+.brand-wordmark *{
+  color:  var(--nav-wordmark) !important;
+  fill:   var(--nav-wordmark) !important;   /* für SVG-Logos */
+  stroke: var(--nav-wordmark) !important;   /* falls Linienlogo */
+}
+
+/* Burger nutzt currentColor → einfach Farbe setzen */
+#nav-trigger,
+.a83-burger,
+.nav-toggle{
+  color: var(--nav-burger) !important;
+}

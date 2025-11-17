@@ -1,0 +1,127 @@
+/* ===== A83 Custom Burger — clean, no background, aria-driven ===== */
+:root{
+  --a83-burger-size: 28px;     /* Hitbox */
+  --a83-burger-thick: 2px;     /* Strichstärke */
+  --a83-burger-gap: 6px;       /* Abstand der Linien */
+  --a83-burger-dur: 320ms;     /* Animdauer */
+  --a83-ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Farbquelle vom Header (wie bei der Wordmark) */
+#site-header{ --nav-burger: var(--hcl-brand-1, #fff); }
+#site-header[data-tone="light"]{ --nav-burger: var(--hcl-brand-12, #0b0d0c); }
+#site-header[data-tone="dark"] { --nav-burger: var(--hcl-brand-1,  #fff);    }
+
+/* Button-Hitbox */
+#a83-burger, .a83-burger{ all: unset; } /* safety reset falls Theme reinpfuscht */
+#a83-burger, .a83-burger{} /* no-op (nur fürs Auge) */
+
+#a83-burger, /* legacy alias falls mal umbenannt */ 
+#nav-trigger.a83-burger{
+  display:inline-grid; place-items:center;
+  width: var(--a83-burger-size); height: var(--a83-burger-size);
+  cursor: pointer;
+  color: var(--nav-burger);
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.25));
+}
+#site-header[data-tone="light"] #nav-trigger.a83-burger{
+  filter: drop-shadow(0 0 1px rgba(255,255,255,.25));
+}
+
+/* Konstrukt wie „Hamburgers.css“: inner + ::before/::after ergeben 3 Linien */
+.a83-burger .a83-burger-box{
+  position: relative; width: 24px; height: 16px; /* optische Breite */
+}
+.a83-burger .a83-burger-inner,
+.a83-burger .a83-burger-inner::before,
+.a83-burger .a83-burger-inner::after{
+  position: absolute; left:0; right:0;
+  height: var(--a83-burger-thick);
+  background-color: currentColor;
+  border-radius: 2px;
+  content:"";
+  transition: transform var(--a83-burger-dur) var(--a83-ease),
+              opacity   160ms var(--a83-ease);
+  will-change: transform, opacity;
+}
+
+/* Linien-Positionen (geschlossen) */
+.a83-burger .a83-burger-inner{ top: 50%; transform: translateY(-50%); }
+.a83-burger .a83-burger-inner::before{ top: calc(50% - var(--a83-burger-gap)); }
+.a83-burger .a83-burger-inner::after { top: calc(50% + var(--a83-burger-gap)); }
+
+/* Offener Zustand: über aria-expanded=true */
+#nav-trigger[aria-expanded="true"] .a83-burger-inner{
+  transform: translateY(-50%) rotate(45deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::before{
+  transform: translateY(calc(var(--a83-burger-gap))) rotate(-90deg);
+}
+#nav-trigger[aria-expanded="true"] .a83-burger-inner::after{
+  transform: translateY(calc(-1 * var(--a83-burger-gap))) rotate(-90deg);
+}
+
+/* kleine Active-Feedback-Press */
+#nav-trigger.a83-burger:active{ transform: scale(.97); }
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce){
+  .a83-burger .a83-burger-inner,
+  .a83-burger .a83-burger-inner::before,
+  .a83-burger .a83-burger-inner::after{
+    transition: none !important;
+  }
+}
+
+
+:root{
+  --burger-reset-dur: 420ms; /* Dauer der Burger-Reset-Animation */
+}
+
+/* Der Trigger selbst */
+#nav-trigger, .nav-toggle{
+  position: relative;              /* für das ::after-Flash */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Recoil + leichter RGB-Flash */
+#nav-trigger.burger-reset,
+.nav-toggle.burger-reset{
+  animation: a83-burger-recoil var(--burger-reset-dur) var(--ease) both;
+}
+@keyframes a83-burger-recoil{
+  0%   { transform: scale(1) rotate(0deg); filter:none; }
+  22%  { transform: scale(.94) rotate(-.6deg); filter:saturate(1.1) contrast(1.05); }
+  60%  { transform: scale(1.03) rotate(.4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+#nav-trigger.burger-reset::after,
+.nav-toggle.burger-reset::after{
+  content:"";
+  position:absolute; inset:-2px;
+  border-radius: 10px; pointer-events:none; mix-blend-mode: screen; opacity:.9;
+  box-shadow:
+    2px  0 0 var(--hcl-ruby-11, #ff3b6e) inset,
+   -2px  0 0 var(--hcl-glitch-9, #00f0ff) inset;
+  animation: a83-burger-edge var(--burger-reset-dur) steps(14) both;
+}
+@keyframes a83-burger-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%    { transform: translateX(2px)  skewX(.35deg); }
+  50%    { transform: translateX(-2px) skewX(-.35deg); }
+  75%    { transform: translateX(1px)  skewX(.2deg); }
+}
+
+/* Optional (falls dein Burger Linien-Elemente hat, z.B. .line): kleines Jitter */
+#nav-trigger.burger-reset .line,
+.nav-toggle.burger-reset .line{
+  animation: a83-burger-lines var(--burger-reset-dur) steps(10) both;
+}
+@keyframes a83-burger-lines{
+  0%{ transform:none } 30%{ transform:translateX(1px) }
+  55%{ transform:translateX(-1px) } 100%{ transform:none }
+}
+

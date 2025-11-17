@@ -1,0 +1,18 @@
+/* ICON TERMINAL */
+
+.with-icon-terminal{
+  display: inline-flex;               /* Icon + Text in einer Reihe */
+  align-items: center;
+  gap: .45em;                         /* Abstand Icon ↔ Text */
+}
+
+.with-icon-terminal::before{
+  /* Font Awesome Solid */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;                   /* Solid-Stil */
+  content: "\f120";                   /* ← fa-terminal */
+  speak: none;                        /* A11y: keine Sprachausgabe */
+  display: inline-block;
+  line-height: 1;                     /* saubere Vertikalität */
+  font-size: 1em;                     /* Icon skaliert mit Text */
+}

@@ -1,0 +1,161 @@
+/* Brand Watermark Menükarte v1 */
+#nav-overlay .nav-card{ position:relative; overflow:hidden; }
+#nav-overlay .nav-card #nav-brandmark{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity:.28; mix-blend-mode: screen;
+  /* Logo als Maske – austauschen: /assets/logo.svg */
+  -webkit-mask: url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg') no-repeat center / min(72%, 520px) auto;
+          mask: url('/cms/wp-content/uploads/2025/10/logo-a83-white.svg') no-repeat center / min(72%, 520px) auto;
+  /* leichte Bühne unter der Maske */
+  background:
+    radial-gradient(40% 40% at 50% 46%, rgba(255,255,255,.16), transparent 62%),
+    conic-gradient(from 0deg, rgba(255,255,255,.08), transparent 70%);
+  transform: translateZ(0);
+  transition: opacity .45s var(--ease), transform .45s var(--ease), filter .45s var(--ease);
+}
+
+/* Opening: etwas heller + mini Zoom */
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark{
+  opacity:.14; transform: scale(1.02);
+}
+
+/* Closing: smooth ausfaden + leichter Crunch */
+html[data-nav-state="closing"] #nav-overlay .nav-card #nav-brandmark{
+  opacity:0; transform: scale(.985);
+  filter: blur(1px) saturate(1.05);
+}
+
+/* Extra-Glitch-Pulse synchron zu Card-Glitches */
+#nav-overlay .nav-card #nav-brandmark::before,
+#nav-overlay .nav-card #nav-brandmark::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0;
+}
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark::before{
+  opacity:.35; mix-blend-mode: screen;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.10) 0 1px, transparent 2px 4px);
+  animation: wm-scan 520ms linear both;
+}
+html[data-nav-state="opening"] #nav-overlay .nav-card #nav-brandmark::after{
+  opacity:.8; box-shadow:
+    2px 0 0 rgba(0,255,255,.45) inset,
+   -2px 0 0 rgba(255,0,128,.40) inset;
+  animation: wm-edge 420ms steps(12) both;
+}
+@keyframes wm-scan{ 0%{transform:translateY(-70%)} 100%{transform:translateY(70%)} }
+@keyframes wm-edge{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%{ transform: translateX(2px) skewX(.35deg); }
+  50%{ transform: translateX(-2px) skewX(-.35deg); }
+  75%{ transform: translateX(1px) skewX(.2deg); }
+}
+
+/* Fallback: falls Mask nicht supported → feiner SVG-Background */
+@supports not (mask: url('#')){
+  #nav-overlay .nav-card #nav-brandmark{
+    background:
+      url('/assets/logo.svg') no-repeat center / min(72%, 520px) auto,
+      radial-gradient(40% 40% at 50% 46%, rgba(255,255,255,.16), transparent 62%);
+    opacity:.06;
+  }
+}
+
+/* === A83 Nav-Card Anti-Center Hardening ===================== */
+
+/* Falls Overlay vom Theme/Builder irgendwo als Flex/Grid zentriert wurde: entwaffnen */
+#nav-overlay{
+  display: block !important;
+  align-items: normal !important;
+  justify-content: normal !important;
+  place-items: initial !important;
+  text-align: initial !important;
+}
+
+/* Karte *hart* oben rechts pinnen – unabhängig von Eltern-Layout */
+#nav-overlay > .nav-card{
+  position: fixed !important;
+  top: max(var(--header-h, 52px), clamp(12px, 2vw, 24px)) !important;
+  right: clamp(12px, 2vw, 24px) !important;
+  left: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  transform-origin: top right !important;
+}
+
+/* Kein „Center durch Containerbreite“: Sicherheitsnetz bei Breakpoint-Regeln */
+#nav-overlay > .nav-card{
+  max-width: none !important;   /* Breite kommt von width/min() weiter oben */
+}
+
+/* Brandmark ist reines Deko-Layer unter Inhalt */
+#nav-overlay .nav-card{ position: relative !important; overflow: hidden !important; }
+#nav-overlay .nav-card #nav-brandmark{
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Inhalt der Karte liegt sicher über dem Brandmark */
+#nav-overlay .nav-card > *:not(#nav-brandmark){
+  position: relative;
+  z-index: 1;
+}
+
+/* Falls irgendwo „text-align:center“ reinfunkt (Themes lieben das): neutralisieren */
+#nav-overlay .nav-head,
+#nav-overlay .nav-menu{
+  text-align: initial !important;
+  justify-items: initial !important;
+  justify-content: initial !important;
+}
+
+/* Für den (seltenen) Fall, dass .nav-card vom Builder als Flex/Grid gesetzt wurde: */
+#nav-overlay .nav-card{
+  display: block !important; /* verhindert zentrierende place-items/justify-content */
+}
+
+
+#nav-overlay .nav-card{
+  isolation: isolate; /* verhindert, dass mix-blend-mode Eltern beeinflusst */
+}
+#nav-overlay .nav-card #nav-brandmark{
+  opacity: .06; /* subtler = weniger Risiko für Theme-Styles mit blend-Interaktionen */
+}
+
+/* === A83 NAV-CARD: HARD TOP-RIGHT ANCHOR (kills BD center rules) === */
+#nav-overlay .nav-card{
+  position: fixed !important;
+
+  /* alles zurücksetzen und bewusst oben rechts setzen */
+  inset: auto auto auto auto !important;        /* reset */
+  top: max(var(--header-h,52px), clamp(12px,2vw,24px)) !important;
+  right: clamp(12px, 2vw, 24px) !important;
+  bottom: auto !important;
+  left: auto !important;
+
+  /* jedes "zentriere mich" killen */
+  margin: 0 !important;
+  max-width: none !important;                    /* falls BD ein max-width setzt */
+  transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale)); /* deine Startwerte bleiben */
+  transform-origin: top right !important;
+}
+
+/* Falls ein zentrierender Inline-Style reingrätscht (left:50% / translateX(-50%)) */
+#nav-overlay .nav-card[style*="left: 50%"]{
+  left: auto !important;
+  transform: none !important;
+}
+
+/* Sicherheitsnetz: logische Properties für RTL/LTR */
+#nav-overlay .nav-card{
+  inset-inline-end: clamp(12px, 2vw, 24px) !important;
+  inset-inline-start: auto !important;
+}
+
+/* Nur falls ein elterliches BD-Wrapper-Element versucht, Kinder zu zentrieren */
+#nav-overlay{
+  display: block !important;        /* vermeidet grid/flex-centering von Kindern */
+  place-items: initial !important;
+  justify-items: initial !important;
+  align-items: initial !important;
+}

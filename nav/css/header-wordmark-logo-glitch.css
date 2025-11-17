@@ -1,0 +1,96 @@
+/* ===== A83 Header Wordmark — Destructive Text Glitch (no bg) v2.0 ===== */
+:root{
+  --wm-h: clamp(20px, 2.4vw, 34px);
+  --wm-left: clamp(12px, 2vw, 24px);
+  --wm-top:  clamp(10px, 1.6vw, 16px);
+  --wm-burst: 560ms;          /* Dauer eines Glitch-Bursts */
+  --wm-steps: 16;             /* Jitter-„Stufen“ (steps()) */
+}
+
+#brand-wordmark{
+  position:absolute; left:var(--wm-left); top:var(--wm-top);
+  height:var(--wm-h); max-width: 42vw;
+  display:grid; place-items:center; padding:0;
+  border-radius:12px; isolation:isolate; z-index:41;
+
+  /* kein Hintergrund/Glas/Schatten */
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+
+  opacity: 1;
+  transition: opacity .24s ease, transform .24s ease, filter .24s ease;
+}
+
+/* Basislogo */
+#brand-wordmark > img{
+  height:100%; width:auto; display:block; position:relative; z-index:1;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.35)) drop-shadow(0 0 10px rgba(0,0,0,.18));
+}
+
+/* Ghost-Layer (werden per JS erzeugt) */
+#brand-wordmark .wm-ghost{
+  position:absolute; inset:0;
+  height:100%; width:auto; margin:auto; /* skaliert wie Base */
+  opacity:0; pointer-events:none; z-index:2;
+  mix-blend-mode: screen;
+  transform: translate3d(0,0,0);
+  will-change: transform, clip-path, filter, opacity;
+}
+
+/* Farbcharakter der Ghosts */
+#brand-wordmark .wm-ghost.c{ filter: hue-rotate(160deg) saturate(1.6) brightness(1.05); }
+#brand-wordmark .wm-ghost.m{ filter: hue-rotate(-160deg) saturate(1.6) brightness(1.05); }
+
+/* Wenn aktiv, werden Ghosts sichtbar und jitternd bewegt */
+#brand-wordmark.g-active .wm-ghost{
+  opacity:.95;
+  animation: wm-jitter var(--wm-burst) steps(var(--wm-steps)) both,
+             wm-pulse  calc(var(--wm-burst) * .8) ease-in-out both;
+}
+
+/* Subtiles Jittern auch auf dem Basislogo */
+#brand-wordmark.g-active > img{
+  animation: wm-base-jitter calc(var(--wm-burst) * .9) steps(10) both;
+}
+
+/* Dim-Zustand außerhalb von Hover/Burst */
+#brand-wordmark.idle-dim{ opacity:.62; filter: saturate(102%) contrast(1.02); }
+
+/* Hover: voll sichtbar + sofort Burst (JS triggert .g-active) */
+#brand-wordmark:hover,
+#brand-wordmark:focus-visible{ opacity:1; }
+
+/* Jitter/Crack Keyframes (ohne runterfahrende Linien) */
+@keyframes wm-jitter{
+  0%   { transform: translate(0,0) skewX(0deg); }
+  15%  { transform: translate(1px,0) skewX(.4deg); }
+  30%  { transform: translate(-2px,0) skewX(-.5deg); }
+  45%  { transform: translate(2px,0) skewX(.6deg); }
+  60%  { transform: translate(-1px,0) skewX(-.4deg); }
+  75%  { transform: translate(2px,0) skewX(.5deg); }
+  100% { transform: translate(0,0) skewX(0deg); }
+}
+@keyframes wm-base-jitter{
+  0%   { transform: translate(0,0); }
+  40%  { transform: translate(-0.5px,0); }
+  70%  { transform: translate(0.5px,0); }
+  100% { transform: translate(0,0); }
+}
+@keyframes wm-pulse{
+  0% { filter: saturate(1.2) contrast(1.06); }
+  100%{ filter: none; }
+}
+
+/* Mobile Position */
+@media (max-width: 768px){
+  :root{ --wm-h: clamp(18px,5.5vw,28px); }
+  #brand-wordmark{ left:12px; top:10px; max-width:60vw; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce){
+  #brand-wordmark.g-active .wm-ghost,
+  #brand-wordmark.g-active > img{ animation: none !important; }
+}

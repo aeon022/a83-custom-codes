@@ -1,0 +1,393 @@
+/* ===== Off-Canvas A83 — v13.3 (No-Teleport, Close im Head, Wild Glitch, Hint single-line hard) ===== */
+:root{
+  --brand: var(--hcl-ruby-9,#e54666);
+  --card-bg: color-mix(in oklab,var(--brand) 12%, rgba(12,16,14,.82));
+  --card-bd: color-mix(in oklab,var(--brand) 32%, rgba(229,70,102,.28));
+  --dim: rgba(10,14,12,.55);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --t-burger: 350ms;      /* DP-Burger zuerst spielen lassen */
+  --t-card: 680ms;        /* Morph-In Dauer */
+  --t-card-out: 360ms;
+  --t-backdrop-out: 260ms;
+
+  --radius: 20px;
+  --shadow: 0 12px 40px rgba(0,0,0,.35);
+
+  /* Wild Glitch */
+  --glitch-card-dur: 640ms;  /* Card-Pulse */
+  --glitch-link-dur: 520ms;  /* Link-Glitch */
+
+  /* Headerhöhe für sichere Card-Top-Position */
+  --header-h: 52px;
+}
+
+.site-header{ position:relative; z-index:40; }
+
+/* ---------- Overlay / Backdrop ---------- */
+#nav-overlay{
+  position: fixed; inset: 0; z-index: 1000;
+  display:none; pointer-events:none; opacity:0; isolation:isolate;
+}
+#nav-overlay::before{
+  content:""; position: fixed; inset:0; z-index:0;
+  background: var(--dim);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  opacity:0; transition:opacity 260ms linear; pointer-events:none;
+}
+#nav-overlay[aria-hidden="false"]{ display:block; pointer-events:auto; opacity:1; }
+html[data-nav-state="opening"] #nav-overlay::before,
+html[data-nav-state="open"]    #nav-overlay::before{
+  opacity:1;
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+html[data-nav-state="closing"] #nav-overlay::before{
+  transition-delay: var(--t-card-out);
+  opacity:0;
+}
+#nav-overlay .nav-backdrop{ display:none !important; } /* wir nutzen ::before */
+
+/* ---------- Karte ---------- */
+#nav-overlay .nav-card{
+  position: fixed;
+  top: max(var(--header-h, 52px), clamp(12px, 2vw, 24px)); /* sicher unter Header */
+  right: clamp(12px, 2vw, 24px);
+  width: min(560px, 92vw);
+  max-height: calc(100vh - 24px);
+  overflow:auto;
+  border:1px solid var(--card-bd);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  -webkit-backdrop-filter: saturate(120%);
+  backdrop-filter: saturate(120%);
+  box-shadow: var(--shadow);
+  z-index:2;
+  will-change: transform, opacity, filter;
+
+  /* Startwerte (werden von JS gesetzt) */
+  --from-x: 8px; --from-y: -6px; --from-scale: .94;
+
+  opacity:0;
+  transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale));
+  filter: blur(6px);
+  transition:
+    transform var(--t-card) var(--ease) var(--t-burger),
+    opacity   var(--t-card) var(--ease) var(--t-burger),
+    filter    var(--t-card) var(--ease) var(--t-burger);
+}
+/* Priming = keine Transition bis zum echten Start */
+#nav-overlay .nav-card.card-primed{ transition:none !important; }
+
+/* States */
+html[data-nav-state="opening"] #nav-overlay .nav-card,
+html[data-nav-state="open"]    #nav-overlay .nav-card{ opacity:1; transform:none; filter:none; }
+html[data-nav-state="closing"] #nav-overlay .nav-card{
+  transition-delay:0ms; transition-duration:var(--t-card-out);
+  opacity:0; transform: translate(4px,-4px) scale(.96); filter:blur(4px);
+}
+
+/* ---------- Head & Close ---------- */
+#nav-overlay .nav-head{
+  display:grid;
+  grid-template-columns: auto 1fr auto;  /* [H1] [Spacer] [Close] */
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  border-bottom:1px solid color-mix(in oklab,var(--brand) 20%, transparent);
+  position: sticky; top: 0; z-index:4; /* über Glitch-Layern */
+}
+#nav-overlay .nav-head h1{
+  margin:0; line-height:1.1; font-size:18px; letter-spacing:.02em;
+}
+
+/* rechter Slot: rechts ausrichten, Größe reservieren */
+#nav-overlay #nav-close-slot,
+#nav-overlay .nav-close-slot{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  justify-self:end !important;
+  width:auto !important;
+  pointer-events:auto;
+  min-width: var(--burger-w, 36px);   /* reserviert Platz, kein Springen */
+}
+
+/* Close-Button: Größe = Burger-Größe; transparenter Look */
+#nav-overlay .nav-close-btn{
+  display:grid; place-items:center;
+  width: var(--burger-w, 36px);
+  height: var(--burger-h, 36px);
+  padding:0; margin:0 0 0 auto;
+  border-radius:10px;
+  border:0;
+  background: transparent;
+  color:#fff; line-height:1; cursor:pointer; user-select:none;
+  transition: transform .12s ease;
+}
+#nav-overlay .nav-close-btn:active{ transform: scale(.96); }
+
+/* ---------- Menü + Stagger ---------- */
+#nav-overlay .nav-menu{ padding:12px 16px 18px; display:grid; gap:10px; }
+#nav-overlay .nav-menu > a,
+#nav-overlay .nav-menu > .nav-link{
+  text-decoration:none; color:var(--hs-text-contrast,#fff);
+  font-size:clamp(18px,2.4vw,22px); line-height:1.25;
+  opacity:0; transform: translateY(6px); filter:blur(2px);
+  transition: opacity .42s var(--ease), transform .42s var(--ease), filter .42s var(--ease);
+}
+html[data-nav-state="open"] #nav-overlay .nav-menu > a,
+html[data-nav-state="open"] #nav-overlay .nav-menu > .nav-link{
+  opacity:1; transform:none; filter:none;
+}
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(1){ transition-delay: .24s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(2){ transition-delay: .32s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(3){ transition-delay: .40s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(4){ transition-delay: .48s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(5){ transition-delay: .56s; }
+html[data-nav-state="open"] #nav-overlay .nav-menu > *:nth-child(6){ transition-delay: .64s; }
+
+/* ---------- Hint (horizontal, SINGLE-LINE — maximal gehärtet) ---------- */
+/* -> Grid erzwingt zwei Spalten: [Icon] [Text], zweite Spalte kann ellipsieren */
+#nav-overlay .nav-hint{
+  position: fixed !important;
+  left: clamp(12px, 2vw, 24px) !important;
+  bottom: clamp(12px, 2vh, 24px) !important;
+
+  display: inline-grid !important;
+  grid-auto-flow: column !important;
+  grid-template-columns: auto minmax(0,1fr) !important;
+  align-items: baseline !important;
+  column-gap: 0 !important;
+
+  width: max-content !important;
+  max-width: calc(100vw - 32px) !important;
+
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+
+  transform: none !important;
+  transform-origin: initial !important;
+  writing-mode: horizontal-tb !important;
+
+  pointer-events: none !important;
+  z-index: 3 !important;
+
+  opacity:0; transition:opacity 220ms var(--ease);
+  font-weight:800; letter-spacing:.08em;
+  color:color-mix(in oklab,var(--brand) 80%, #fff);
+  font-size: clamp(16px, 2.0vw, 20px);
+}
+/* absolut alle Wrap-Varianten aushebeln */
+#nav-overlay .nav-hint,
+#nav-overlay .nav-hint *{
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+}
+#nav-overlay.hint-visible .nav-hint{ opacity:.95; }
+
+/* Icon + Text (ellipsiert NUR den Text, nicht das Icon) */
+#nav-overlay .nav-hint i.fa-terminal{
+  grid-column: 1;
+  display:inline-block !important;
+  margin-right: .5ch !important; /* plus echtes &nbsp; im HTML */
+  font-size:.95em; opacity:.95;
+}
+#nav-overlay .nav-hint .cmd{
+  grid-column: 2;
+  min-width: 0 !important;   /* wichtig für grid + ellipsis */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ---------- Body-Lock ---------- */
+html.nav-lock, html.nav-lock body{ overflow:hidden !important; touch-action:none; }
+body.nav-fixed{ position:fixed; width:100%; left:0; right: var(--sbw, 0px); }
+
+/* ============================================================================================= */
+/* ============= WILD GLITCH PACK (Card + Slices + Links + X)  ================================= */
+/* ============================================================================================= */
+
+/* Card Pulse (Scan + RGB Edge) */
+#nav-overlay .nav-card.glitch,
+#nav-overlay .nav-card.glitch-strong{
+  filter: saturate(1.22) contrast(1.07);
+}
+#nav-overlay .nav-card.glitch::before,
+#nav-overlay .nav-card.glitch::after,
+#nav-overlay .nav-card.glitch-strong::before,
+#nav-overlay .nav-card.glitch-strong::after{
+  content:"";
+  position:absolute; inset:-1px; border-radius:inherit;
+  pointer-events:none; z-index:3; /* unter Close (nav-head z-index:4), über Inhalt */
+}
+
+/* Scanlines + Noise */
+#nav-overlay .nav-card.glitch::before,
+#nav-overlay .nav-card.glitch-strong::before{
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.10) 0,
+      rgba(255,255,255,.10) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    radial-gradient( circle at 20% 30%, rgba(255,255,255,.06), transparent 40%),
+    radial-gradient( circle at 80% 70%, rgba(255,255,255,.06), transparent 40%);
+  mix-blend-mode: screen;
+  opacity:.47;
+  animation: a83-scan-strong var(--glitch-card-dur) linear both;
+}
+@keyframes a83-scan-strong{ 0%{transform:translateY(-80%);} 100%{transform:translateY(80%);} }
+
+/* RGB Edge jitter — stärker */
+#nav-overlay .nav-card.glitch::after{
+  box-shadow:
+    2px  0 0 rgba(0,255,255,.52) inset,
+   -2px  0 0 rgba(255,0,128,.45) inset,
+    0    0 0 1px color-mix(in oklab,var(--brand) 70%, transparent) inset;
+  opacity:.95;
+  animation: a83-edge-jitter 480ms steps(16) both;
+}
+#nav-overlay .nav-card.glitch-strong::after{
+  box-shadow:
+    3px  0 0 rgba(0,255,255,.6) inset,
+   -3px  0 0 rgba(255,0,128,.55) inset,
+    0    0 0 1px color-mix(in oklab,var(--brand) 80%, transparent) inset;
+  opacity:1;
+  animation: a83-edge-jitter-2 560ms steps(18) both;
+}
+@keyframes a83-edge-jitter{
+  0%,100%{ transform: translateX(0); }
+  20%{ transform: translateX(2px); }
+  40%{ transform: translateX(-2px); }
+  60%{ transform: translateX(2px); }
+  80%{ transform: translateX(-2px); }
+}
+@keyframes a83-edge-jitter-2{
+  0%,100%{ transform: translateX(0) skewX(0deg); }
+  25%{ transform: translateX(3px) skewX(.5deg); }
+  50%{ transform: translateX(-3px) skewX(-.5deg); }
+  75%{ transform: translateX(3px) skewX(.5deg); }
+}
+
+/* Slice-Glitch-Stripes (JS erzeugt .gl-slices > .gl-slice) */
+#nav-overlay .nav-card .gl-slices{
+  position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:3;
+}
+#nav-overlay .nav-card .gl-slice{
+  position:absolute; left:-8px; right:-8px;
+  background:
+    linear-gradient(90deg,
+      rgba(0,255,255,.20), rgba(255,0,128,.18) 40%, rgba(255,255,255,.08) 60%, rgba(0,0,0,0));
+  mix-blend-mode: screen;
+  filter: saturate(1.25) contrast(1.05);
+  will-change: transform;
+}
+/* zwei Anim-Varianten */
+@keyframes a83-slice-shift{
+  0%{ transform: translateX(0) }
+  25%{ transform: translateX(6px) }
+  50%{ transform: translateX(-8px) }
+  75%{ transform: translateX(4px) }
+  100%{ transform: translateX(0) }
+}
+@keyframes a83-slice-skew{
+  0%{ transform: translateX(0) skewX(0deg) }
+  20%{ transform: translateX(-6px) skewX(-.6deg) }
+  50%{ transform: translateX(5px) skewX(.6deg) }
+  80%{ transform: translateX(-3px) skewX(-.4deg) }
+  100%{ transform: translateX(0) skewX(0deg) }
+}
+
+/* Link-Glitch (Basis + Bursts) */
+#nav-overlay .nav-menu > a,
+#nav-overlay .nav-menu > .nav-link{
+  position: relative;
+  padding-left: 28px; /* Platz für optionales Icon-Fake */
+}
+#nav-overlay .nav-menu.glitch-once .nav-link::before,
+#nav-overlay .nav-menu.glitch-once .nav-link::after,
+#nav-overlay .nav-menu.glitch-once > a::before,
+#nav-overlay .nav-menu.glitch-once > a::after{
+  content: attr(data-title);
+  position:absolute; left:0; top:0; pointer-events:none; z-index:2;
+  opacity:.88; mix-blend-mode: screen; filter: saturate(1.35);
+}
+#nav-overlay .nav-menu.glitch-once .nav-link::before,
+#nav-overlay .nav-menu.glitch-once > a::before{
+  color:#0ff; animation: a83-link-jitter 460ms steps(10) both;
+}
+#nav-overlay .nav-menu.glitch-once .nav-link::after,
+#nav-overlay .nav-menu.glitch-once > a::after{
+  color:#f0f; animation: a83-link-jitter-alt 460ms steps(10) both;
+}
+@keyframes a83-link-jitter{
+  0%{ transform: translate(0,0); }
+  20%{ transform: translate(2px,0); }
+  40%{ transform: translate(-2px,0); }
+  60%{ transform: translate(2px,0); }
+  80%{ transform: translate(-2px,0); }
+  100%{ transform: translate(0,0); }
+}
+@keyframes a83-link-jitter-alt{
+  0%{ transform: translate(0,0); }
+  20%{ transform: translate(-2px,0); }
+  40%{ transform: translate(2px,0); }
+  60%{ transform: translate(-2px,0); }
+  80%{ transform: translate(2px,0); }
+  100%{ transform: translate(0,0); }
+}
+
+/* Zusätzliche Bursts pro Link (.g1/.g2/.g3 werden per JS getoggelt) */
+#nav-overlay .nav-menu .g1,
+#nav-overlay .nav-menu .g2,
+#nav-overlay .nav-menu .g3{
+  text-shadow:
+    1px 0 0 #0ff,
+   -1px 0 0 #f0f,
+    0   0 10px rgba(255,255,255,.18);
+  animation: a83-link-flicker 280ms steps(12) 2;
+  filter: saturate(1.25) contrast(1.05);
+}
+@keyframes a83-link-flicker{
+  0%{ opacity:1; } 40%{ opacity:.6; } 55%{ opacity:1; } 70%{ opacity:.7; } 100%{ opacity:1; }
+}
+
+/* X (Close) später einglitchen */
+#nav-overlay .nav-close-btn.x-hidden{
+  opacity:0; transform: scale(.9) translateY(-2px); filter: blur(2px);
+  transition: opacity 180ms var(--ease), transform 220ms var(--ease), filter 220ms var(--ease);
+}
+#nav-overlay .nav-close-btn.x-glitch::before,
+#nav-overlay .nav-close-btn.x-glitch::after{
+  content:"✕";
+  position:absolute; inset:0; display:grid; place-items:center; pointer-events:none;
+  mix-blend-mode: screen; z-index:2; opacity:.9;
+}
+#nav-overlay .nav-close-btn.x-glitch::before{ color:#0ff; animation: a83-x-jitter 420ms steps(10) both; }
+#nav-overlay .nav-close-btn.x-glitch::after { color:#f0f; animation: a83-x-jitter-2 420ms steps(10) both; }
+@keyframes a83-x-jitter{
+  0%{ transform: translateX(0); } 25%{ transform: translateX(2px); }
+  50%{ transform: translateX(-1px); } 75%{ transform: translateX(1px); } 100%{ transform: translateX(0); }
+}
+@keyframes a83-x-jitter-2{
+  0%{ transform: translateX(0); } 25%{ transform: translateX(-2px); }
+  50%{ transform: translateX(1px); } 75%{ transform: translateX(-1px); } 100%{ transform: translateX(0); }
+}
+
+/* Motion-Respect */
+@media (prefers-reduced-motion: reduce){
+  #nav-overlay .nav-card.glitch,
+  #nav-overlay .nav-card.glitch-strong,
+  #nav-overlay .nav-card .gl-slices,
+  #nav-overlay .nav-menu.glitch-once::before,
+  #nav-overlay .nav-menu.glitch-once::after{
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
