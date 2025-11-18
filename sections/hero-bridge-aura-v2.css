@@ -1,0 +1,451 @@
+/* ===========================================================
+   A83 HERO – FULL CSS (scoped to #hero)
+   =========================================================== */
+
+/* ---------- Vars (Hero-scope) ---------- */
+#hero{
+  --stage-ratio: 16/9;
+  --fade: 240ms;
+  --radius: 16px;
+
+  /* Glitch Timings */
+  --glitch-in: 900ms;
+  --glitch-out: 700ms;
+  --glitch-intensity: 8px;
+  --glitch-scanlines: .55;
+  --glitch-rgb-spread: 2px;
+
+  /* Tone-Bridge */
+  --bridge-opacity: .45;
+}
+
+/* Extra-Glitch tuning (global ok) */
+:root{
+  --gv-vslice-spread: 12px;
+  --gv-vslice-opacity: .75;
+  --gv-block-opacity: .45;
+}
+
+/* ---------- Base Stage / Layers ---------- */
+#hero #show-max{
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--stage-ratio); /* falls im UI keine Ratio gesetzt wurde */
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius);
+}
+
+#hero #show-max .layer-img,
+#hero #show-max .layer-video{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+#hero #show-max .layer-img img{
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}
+
+#hero #show-max .layer-video{
+  opacity: 0; transition: opacity var(--fade) ease; pointer-events: none;
+}
+#hero #show-max .layer-video video{
+  display: block !important;
+  width: 100% !important; height: 100% !important;
+  object-fit: cover !important; object-position: 50% 50% !important;
+}
+
+#hero #show-max.show-video .layer-video{ opacity: 1; }
+#hero #show-max.show-video .layer-img  { opacity: 0; transition: opacity var(--fade) ease; }
+
+/* Trigger unter der Stage (anpassen nach Wunsch) */
+#hero #hover-max{ justify-self: end; }
+
+/* Breakdance Video-Wrapper neutralisieren – nur innerhalb der Stage */
+#hero #show-max .layer-video .breakdance-video,
+#hero #show-max .layer-video .breakdance-video-container,
+#hero #show-max .layer-video .breakdance-video-wrapper,
+#hero #show-max .layer-video .bd-video-container{
+  position: absolute !important; inset: 0 !important;
+  width: 100% !important; height: 100% !important;
+  padding: 0 !important; margin: 0 !important;
+}
+#hero #show-max .layer-video .breakdance-video-wrapper > *{
+  position: absolute !important; inset: 0 !important;
+  width: 100% !important; height: 100% !important;
+}
+#hero #show-max .layer-video *{
+  max-width: 100% !important; max-height: 100% !important;
+}
+
+/* ===========================================================
+   GLITCH FX – base overlay + keyframes
+   =========================================================== */
+
+/* Overlay-Container */
+#hero #show-max .gfx-glitch{
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:0;                /* normal unsichtbar */
+  mix-blend-mode:screen;
+}
+/* globale Glitch-Phase */
+#hero #show-max.glitching .gfx-glitch{ opacity:1; }
+
+/* Scanlines + Noise */
+#hero #show-max.glitching::before{
+  content:"";
+  position:absolute; inset:-1px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.06) 0 2px,
+      rgba(0,0,0,0.06) 2px 4px
+    );
+  opacity: var(--glitch-scanlines);
+  mix-blend-mode: soft-light;
+  animation: a83-flicker 90ms steps(2) infinite;
+}
+#hero #show-max.glitching::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(100% 140% at 0% 0%, rgba(255,0,64,.12), transparent 50%),
+    radial-gradient(100% 140% at 100% 100%, rgba(0,255,255,.10), transparent 50%);
+  mix-blend-mode: color-dodge;
+  opacity:.6;
+  animation: a83-pulse 560ms ease-in-out infinite;
+}
+
+/* Slices */
+#hero #show-max .gfx-glitch .g-slice{
+  position:absolute;
+  left:-10px; right:-10px;
+  background:
+    linear-gradient(90deg,
+      rgba(255,0,64,.50), rgba(0,255,255,.35) 60%, transparent 80%),
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,.10) 0 2px,
+      transparent 2px 4px);
+  height: 6%;
+  transform: translateX(0);
+  filter: saturate(1.5) contrast(1.2);
+  opacity: 0;
+}
+/* Anim trigger */
+#hero #show-max.glitch-in  .gfx-glitch .g-slice{ animation: a83-slice-in  var(--glitch-in)  ease-in forwards; }
+#hero #show-max.glitch-out .gfx-glitch .g-slice{ animation: a83-slice-out var(--glitch-out) ease-out forwards; }
+/* Position/Delay */
+#hero #show-max .gfx-glitch .g-slice:nth-child(1){ top: 8%;  animation-delay: 0ms;  }
+#hero #show-max .gfx-glitch .g-slice:nth-child(2){ top: 22%; animation-delay: 40ms; }
+#hero #show-max .gfx-glitch .g-slice:nth-child(3){ top: 38%; animation-delay: 80ms; }
+#hero #show-max .gfx-glitch .g-slice:nth-child(4){ top: 55%; animation-delay: 120ms;}
+#hero #show-max .gfx-glitch .g-slice:nth-child(5){ top: 71%; animation-delay: 160ms;}
+#hero #show-max .gfx-glitch .g-slice:nth-child(6){ top: 86%; animation-delay: 200ms; }
+
+/* RGB-Split/Jitter */
+#hero #show-max.glitching .layer-img,
+#hero #show-max.glitching .layer-video{
+  animation: a83-jitter 110ms steps(2) infinite;
+  filter: contrast(1.15) saturate(1.25);
+}
+#hero #show-max.glitching .layer-video{
+  filter: contrast(1.25) saturate(1.35) hue-rotate(6deg);
+}
+/* leichte RGB-Schlagschatten */
+#hero #show-max.glitching .layer-img{
+  box-shadow: var(--glitch-rgb-spread) 0 0 rgba(255,0,64,.35),
+              calc(var(--glitch-rgb-spread) * -1) 0 0 rgba(0,255,255,.30);
+}
+#hero #show-max.glitching .layer-video{
+  box-shadow: calc(var(--glitch-rgb-spread) * .5) 0 0 rgba(255,0,64,.35),
+              calc(var(--glitch-rgb-spread) * -.5) 0 0 rgba(0,255,255,.30);
+}
+
+/* Keyframes */
+@keyframes a83-slice-in{
+  0%{opacity:0; transform:translateX(0);}
+  15%{opacity:1; transform:translateX(calc(var(--glitch-intensity) * -1));}
+  30%{transform:translateX(calc(var(--glitch-intensity)));}
+  45%{transform:translateX(calc(var(--glitch-intensity) * -0.5));}
+  60%{transform:translateX(calc(var(--glitch-intensity) * 0.8));}
+  80%{transform:translateX(0);}
+  100%{opacity:0;}
+}
+@keyframes a83-slice-out{
+  0%{opacity:0; transform:translateX(0);}
+  20%{opacity:1; transform:translateX(calc(var(--glitch-intensity)));}
+  40%{transform:translateX(calc(var(--glitch-intensity) * -1));}
+  60%{transform:translateX(calc(var(--glitch-intensity) * 0.6));}
+  80%{transform:translateX(0);}
+  100%{opacity:0;}
+}
+@keyframes a83-jitter{ 0%{transform:translate(0,0);} 50%{transform:translate(1px,-1px);} 100%{transform:translate(0,0);} }
+@keyframes a83-flicker{ 0%,100%{opacity:.4;} 50%{opacity:.7;} }
+@keyframes a83-pulse{ 0%,100%{opacity:.4; transform:scale(1);} 50%{opacity:.7; transform:scale(1.01);} }
+
+/* ===========================================================
+   EXTRA GLITCH PACK – vertikale Slices + Block Tears
+   =========================================================== */
+#show-max .gv-vslices{
+  position:absolute; inset:0; pointer-events:none; z-index: 6; border-radius: inherit;
+}
+#show-max .gv-vslice{
+  position:absolute; top:-10px; bottom:-10px; left:0;
+  width: 12%; opacity: 0;
+  background:
+    linear-gradient(0deg,
+      rgba(0,255,255,.35),
+      rgba(255,0,128,.30) 55%,
+      rgba(255,255,255,.18) 80%,
+      transparent 100%);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+@keyframes gv-vslice-jitter{
+  0%{ transform:translateX(0) skewY(0deg); opacity:0; }
+  12%{ opacity: var(--gv-vslice-opacity); }
+  25%{ transform:translateX(var(--gv-vslice-spread)) skewY(.6deg); }
+  50%{ transform:translateX(calc(var(--gv-vslice-spread) * -1)) skewY(-.6deg); }
+  75%{ transform:translateX(calc(var(--gv-vslice-spread) * .5)) skewY(.3deg); }
+  100%{ transform:translateX(0) skewY(0deg); opacity:0; }
+}
+
+#show-max .gv-blocks{
+  position:absolute; inset:0; pointer-events:none; z-index: 7; border-radius: inherit;
+}
+#show-max .gv-block{
+  position:absolute; left:0; top:0; width:20%; height:10%;
+  opacity:0;
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,.18),
+      rgba(0,255,255,.30) 40%,
+      rgba(255,0,128,.30) 60%,
+      rgba(0,0,0,0) 100%);
+  mix-blend-mode: screen;
+  filter: saturate(1.4) contrast(1.1);
+  will-change: transform, opacity;
+}
+@keyframes gv-block-pop{
+  0%{ transform:translate(0,0) scale(1) skewX(0deg); opacity:0; }
+  12%{ transform:translate(2px,-3px) scale(1.02) skewX(.8deg); opacity: var(--gv-block-opacity); }
+  45%{ transform:translate(-3px,2px) scale(1.015) skewX(-.8deg); opacity: calc(var(--gv-block-opacity) * .8); }
+  80%{ transform:translate(0,0) scale(1.005) skewX(.25deg); opacity:.18; }
+  100%{ transform:translate(0,0) scale(1) skewX(0deg); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  #show-max .gv-vslice, #show-max .gv-block{ animation: none !important; }
+}
+
+/* ===========================================================
+   MOBILE FIX – Video immer voll füllen (mit deiner min-height)
+   =========================================================== */
+@media (max-width: 767px){
+  #hero #show-max{
+    min-height: clamp(560px, 36svh, 760px);
+    height: auto; width: 100%;
+    position: relative; overflow: hidden;
+  }
+  #hero #show-max .layer-img, #hero #show-max .layer-video{
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  #hero #show-max .layer-img img{
+    display: block; width: 100%; height: 100%;
+    object-fit: cover !important; object-position: 50% 50% !important;
+  }
+  #hero #show-max .layer-video, #hero #show-max .layer-video *{
+    position: absolute !important; inset: 0 !important;
+    width: 100% !important; height: 100% !important;
+    padding: 0 !important; margin: 0 !important;
+    max-width: 100% !important; max-height: 100% !important;
+  }
+  #hero #show-max .layer-video video{
+    display: block !important;
+    object-fit: cover !important; object-position: 50% 50% !important;
+  }
+}
+
+/* ===========================================================
+   TONE-BRIDGE + STAGE AURA + BG PATTERN (Desktop only)
+   =========================================================== */
+
+
+/* Stacking & Compositing absichern */
+#hero { 
+  /* DEIN Grün hier hart setzen, damit Blends nie „weiß“ werden */
+  background-color: #0F3F36; /* <- ersetze durch deinen exakten Hex */
+}
+#hero .hero-wrapper{ position: relative; isolation: isolate; }
+#hero .text, #hero .stage{ position: relative; z-index: 2; }
+
+
+/* Context/Stacking absichern */
+#hero .hero-wrapper{ position: relative; isolation: isolate; }
+#hero .tone-bridge{ position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+#hero .text, #hero .stage{ position: relative; z-index: 2; }
+
+/* ===== Tone-Bridge v2 (robust, ohne Masking) ===== */
+#hero .tone-bridge{ 
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  opacity: 0; /* wird nur auf großen Screens eingeblendet */
+}
+
+/* Desktop: Bridge aktivieren */
+
+@media (min-width: 1280px){
+  #hero .tone-bridge{
+    left: clamp(32px, 6vw, 120px); /* groß: clamp(16px, 4vw, 80px); */
+    right: clamp(120px, 16vw, 280px); /* groß: clamp(80px, 14vw, 220px); */
+    top: 8%; 
+    bottom: 12%; 
+
+
+    /* weiche Bewegung + eigener Compositing-Layer */
+    will-change: transform, opacity, clip-path;
+    transform: translateZ(0) skewX(-4deg);
+    transition: opacity 400ms ease;
+
+    /* FARBE/LICHT – passe Alphas an dein Branding an */
+    background:
+      radial-gradient(120% 100% at 25% 45%, rgba(255, 0, 128, .12), transparent 60%),
+      radial-gradient(120% 120% at 65% 55%, rgba(0, 255, 255, .10), transparent 70%),
+      linear-gradient(100deg, rgba(255,255,255,.03), rgba(255,255,255,.01) 60%, transparent 80%);
+    filter: blur(2px); /* Kanten weicher */
+    mix-blend-mode: soft-light;   /* leicht: soft-light, kräftig: overlay */
+    opacity: 0.28;             /* Stellschraube: .35–.70 */
+
+    /* FORM (statt mask-image): Band als Polygon */
+    clip-path: polygon(
+      0% 30%,  62% 14%, 100% 28%, 
+      100% 72%, 38% 86%, 0% 70%
+    );
+
+    /* leichte, endlose Bewegung */
+    animation: a83-bridge-drift 6.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes a83-bridge-drift{
+    0%   { transform: translateZ(0) skewX(-6deg) translateY(0);     }
+    100% { transform: translateZ(0) skewX(-6deg) translateY(-0.6%); }
+  }
+}
+
+/* Fallback, falls ein Browser kein clip-path mag (selten) */
+@supports not (clip-path: polygon(0 0,100% 0,100% 100%,0 100%)){
+  @media (min-width: 1280px){
+    #hero .tone-bridge{
+      /* Notlösung: weicher Verlauf mit transparenter Kante */
+      clip-path: none;
+      background:
+        linear-gradient(100deg,
+          rgba(255, 0, 128, .16) 0%,
+          rgba(0, 255, 255, .14) 55%,
+          rgba(0, 0, 0, 0) 85%);
+      opacity: .45;
+    }
+  }
+}
+/* Stage-Aura hinter dem Visual */
+@media (min-width: 1024px){
+  #hero .stage-aura{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(60% 70% at 70% 40%, rgba(0,255,255,.16), transparent 60%),
+      radial-gradient(55% 60% at 40% 65%, rgba(255,0,128,.18), transparent 70%),
+      radial-gradient(80% 90% at 50% 50%, rgba(255,255,255,.06), transparent 80%);
+    filter: blur(34px) saturate(115%);
+    opacity: .75;
+    animation: a83-aura-breathe 6s ease-in-out infinite alternate;
+  }
+  @keyframes a83-aura-breathe{
+    0%{ transform: scale(1);   opacity:.8; }
+    100%{ transform: scale(1.03); opacity:.95; }
+  }
+}
+
+/* Subtiles Tech-Pattern im Hero-Hintergrund */
+@media (min-width: 1280px){
+  #hero{
+    background-image:
+      linear-gradient(115deg, rgba(255,255,255,.045) 1px, rgba(0,0,0,0) 1px),
+      linear-gradient(295deg, rgba(255,255,255,.035) 1px, rgba(0,0,0,0) 1px),
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 28px 28px, 28px 28px, 14px 14px;
+    background-position: 0 0, 0 0, 0 0;
+    background-blend-mode: soft-light, soft-light, normal;
+  }
+}
+
+
+
+
+
+/* === PATCH: Bridge ultra-dezent, Aura knallig (append at end) === */
+
+/* Bridge: minimal sichtbar, sehr langsam, kaum Bewegung */
+@media (min-width:1280px){
+  #hero .tone-bridge{
+    mix-blend-mode: soft-light;   /* für NOCH leiser: normal */
+    opacity: .12;                 /* ~ .10–.14 */
+    left: clamp(64px, 8vw, 160px);
+    right: clamp(160px, 20vw, 360px);
+    top: 12%;
+    bottom: 16%;
+
+    /* sehr schmales, flaches Band */
+    clip-path: polygon(
+      0% 44%, 62% 40%, 100% 44%,
+      100% 56%, 38% 60%, 0% 56%
+    );
+    transform: translateZ(0) skewX(-2deg);
+
+    /* extrem dezente Farbmischung */
+    background:
+      radial-gradient(120% 100% at 25% 45%, rgba(255, 0, 128, .06), transparent 60%),
+      radial-gradient(120% 120% at 65% 55%, rgba(0, 255, 255, .05), transparent 70%),
+      linear-gradient(100deg, rgba(255,255,255,.012), rgba(255,255,255,.006) 60%, transparent 80%);
+    filter: blur(0.5px);
+
+    /* viel langsamer + Mini-Amplitude */
+    animation: a83-bridge-drift var(--bridge-dur, 18s) ease-in-out infinite alternate;
+    --bridge-skew: -2deg;   /* konstante, sehr leichte Schräglage */
+    --bridge-amp:  -0.06%;  /* kaum Bewegung */
+  }
+
+  /* Keyframes (überschreibt frühere Def.) */
+  @keyframes a83-bridge-drift{
+    0%   { transform: translateZ(0) skewX(var(--bridge-skew)) translateY(0); }
+    100% { transform: translateZ(0) skewX(var(--bridge-skew)) translateY(var(--bridge-amp)); }
+  }
+}
+
+/* Aura: richtig „knallig“ – mehr Glow, kräftigere Farben, etwas zackiger */
+@media (min-width:1024px){
+  #hero .stage-aura{
+    opacity: .96;                           /* deutlich präsenter */
+    filter: blur(52px) saturate(160%);      /* stärkerer Glow */
+    /* sattere Farblayer */
+    background:
+      radial-gradient(60% 72% at 72% 40%, rgba(0,255,255,.22), transparent 60%),
+      radial-gradient(58% 62% at 42% 66%, rgba(255,0,128,.24), transparent 70%),
+      radial-gradient(85% 95% at 50% 50%, rgba(255,255,255,.10), transparent 80%);
+
+    /* spürbare, aber nicht hektische Bewegung */
+    animation: a83-aura-breathe var(--aura-dur, 8s) ease-in-out infinite alternate;
+
+    /* größere Range */
+    --aura-scale: 1.055;
+    --aura-op-min: .90;
+    --aura-op-max: .99;
+  }
+
+  /* Keyframes (überschreibt frühere Def.) */
+  @keyframes a83-aura-breathe{
+    0%   { transform: scale(1);                 opacity: var(--aura-op-min); }
+    100% { transform: scale(var(--aura-scale)); opacity: var(--aura-op-max); }
+  }
+}
+
+/* Optional: Idle-Glitch weiter beruhigen (falls nötig) */
+#hero{ --glitch-scanlines: .30; }

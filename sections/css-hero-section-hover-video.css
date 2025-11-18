@@ -1,0 +1,51 @@
+/* CSS for HERO Section */
+
+/* ===== A83 HERO – Grid erzwingen (scoped) ===== */
+#hero #hero-wrapper{
+  display: grid;             /* falls UI spinnt */
+  gap: 20px;
+  align-items: start;
+  grid-template-columns: 1fr;                     /* Base/Mobile */
+  grid-template-areas:
+    "stage"
+    "text";
+}
+
+/* Desktop ab 1024px: echte 2 Spalten + Areas */
+@media (min-width: 1024px){
+  #hero #hero-wrapper{
+    /* linke Spalte min 320, ideal 40vw, max 560 – Stage nimmt den Rest */
+    grid-template-columns: clamp(320px, 40vw, 560px) minmax(0, 1fr);
+    grid-template-areas: "text stage";
+    align-items: center;      /* optisch schön ausrichten */
+    column-gap: 40px;         /* wie in deinem Screenshot */
+  }
+}
+
+/* Sicherheit: Kinder explizit in die Areas (falls Attribute fehlen) */
+#hero #hero-wrapper .hero-text  { grid-area: text; }
+#hero #hero-wrapper .hero-stage { grid-area: stage; }
+
+/* --- Stage-Stack (wie gehabt, gekürzt) --- */
+#hero #show-max{
+  position: relative; width:100%; aspect-ratio: 16/9;
+  overflow:hidden; isolation:isolate; border-radius: 16px;
+}
+#hero #show-max .layer-img, #hero #show-max .layer-video{ position:absolute; inset:0; width:100%; height:100%; }
+#hero #show-max .layer-img img{ display:block; width:100%; height:100%; object-fit:cover; }
+#hero #show-max .layer-video{ opacity:0; transition:opacity 240ms ease; pointer-events:none; }
+#hero #show-max .layer-video video{ display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; }
+#hero #show-max.show-video .layer-video{ opacity:1; }
+#hero #show-max.show-video .layer-img{ opacity:0; transition:opacity 240ms ease; }
+
+/* Breakdance-Video-Wrapper neutralisieren (nur in der Stage) */
+#hero #show-max .layer-video .breakdance-video,
+#hero #show-max .layer-video .breakdance-video-container,
+#hero #show-max .layer-video .breakdance-video-wrapper,
+#hero #show-max .layer-video .bd-video-container{
+  position:absolute!important; inset:0!important; width:100%!important; height:100%!important;
+  padding:0!important; margin:0!important;
+}
+#hero #show-max .layer-video .breakdance-video-wrapper > *{
+  position:absolute!important; inset:0!important; width:100%!important; height:100%!important;
+}

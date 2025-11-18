@@ -1,0 +1,355 @@
+/* ===========================================================
+   A83 HERO — NEON WIRE (final, ID-safe & grid-aware)
+   - anchored to #text/.text (egal ob ID oder Klasse)
+   - .text über .stage gestackt
+   - Wire-Länge = Grid-Gap + Stück in die Stage
+   =========================================================== */
+
+/* Feintuning + Grid-Variablen */
+#hero{
+  --wire-angle: -10deg;                         /* -12 … -6 */
+  --wire-thickness: 2px;                        /* 1.5–3px */
+  --wire-offset: 56%;                           /* vertikale Pos im Text-Container */
+
+  /* Grid + Reichweite in die Stage */
+  --grid-gap: 56px;                             /* <<< auf deine echte BD-Gap stellen */
+  --wire-into-stage: clamp(180px, 14vw, 420px); /* wie weit in die Stage ragen */
+  --wire-end-padding: 16px;                     /* minimal früher enden (bzgl. Rundungen) */
+  --wire-gap-fine: -6px;                        /* Feintuning im Gap (negativ = näher an Text) */
+
+  /* Shimmer/Look */
+  --wire-core-alpha: .90;                       /* 0.7–1.0 */
+  --wire-glow-alpha: .30;                       /* 0.18–.45 */
+  --wire-speed: 8s;                             /* Shimmer-Speed */
+
+  /* (Optional) Fallback-Länge, falls du wieder fix willst */
+  --wire-length: clamp(380px, 34vw, 820px);
+}
+
+/* Optional: eine Quelle der Wahrheit für die Gap am Wrapper setzen */
+#hero .hero-wrapper{ --grid-gap: 56px; }  /* an BD-Grid (Desktop) angleichen */
+
+/* Text-Spalte als Anker + über Stage stacken (ID ODER Klasse) */
+#hero #text, 
+#hero .text{
+  position: relative;
+  z-index: 3;           /* über Stage */
+  overflow: visible;    /* Wire darf in den Gap ragen */
+}
+
+/* Stage bewusst darunter */
+#hero #stage,
+#hero .stage{
+  position: relative;
+  z-index: 2;
+}
+
+/* Wire-Element (leeres Div .neon-wire als letztes Kind in #text/.text) */
+#hero #text .neon-wire,
+#hero .text .neon-wire{
+  position: absolute;
+  z-index: 5;                 
+  pointer-events: none;
+
+  left: 100%;                 /* am rechten Rand der Text-Spalte andocken */
+  top: var(--wire-offset);
+
+  /* >>> LÄNGE dynamisch: Gap + Stage-Reichweite - Puffer */
+  width: calc(var(--grid-gap, 56px) + var(--wire-into-stage) - var(--wire-end-padding));
+  height: var(--wire-thickness);
+
+  /* >>> vom Text aus exakt in den Gap schieben, dann drehen */
+  transform: translate(calc(-1 * var(--grid-gap, 56px) + var(--wire-gap-fine)), -50%)
+             rotate(var(--wire-angle));
+  transform-origin: left center;
+  opacity: 1;
+}
+
+/* Kernlinie + Shimmer */
+#hero #text .neon-wire::before,
+#hero .text .neon-wire::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg,
+      rgba(255,0,128,0) 0%,
+      rgba(255,0,128,var(--wire-core-alpha)) 12%,
+      rgba(0,255,255,var(--wire-core-alpha)) 50%,
+      rgba(255,0,128,var(--wire-core-alpha)) 88%,
+      rgba(255,0,128,0) 100%);
+  background-size: 200% 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0 5%, #000 15% 85%, transparent 95% 100%);
+          mask-image: linear-gradient(to right, transparent 0 5%, #000 15% 85%, transparent 95% 100%);
+  animation: a83-wire-flow var(--wire-speed) linear infinite;
+  filter: saturate(150%);
+}
+
+/* Glow */
+#hero #text .neon-wire::after,
+#hero .text .neon-wire::after{
+  content:"";
+  position:absolute;
+  left:-12px; right:-12px; top:-10px; bottom:-10px;
+  border-radius: 999px;
+  background: inherit;
+  filter: blur(16px) saturate(160%);
+  opacity: var(--wire-glow-alpha);
+  pointer-events: none;
+}
+
+/* optionale End-Knoten (nur wenn 2× <i> in das Div gelegt wurden) */
+#hero #text .neon-wire i,
+#hero .text .neon-wire i{
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px; border-radius: 999px; pointer-events:none;
+  background:
+    radial-gradient(circle, rgba(255,0,128,.70), rgba(255,0,128,0) 60%),
+    radial-gradient(circle, rgba(0,255,255,.55), rgba(0,255,255,0) 70%);
+  filter: blur(1px) saturate(150%);
+  opacity: .6;
+}
+#hero #text .neon-wire i:first-child,
+#hero .text .neon-wire i:first-child{ left: -6px; }
+#hero #text .neon-wire i:last-child,
+#hero .text .neon-wire i:last-child{  right: -6px; }
+
+/* Shimmer-Animation */
+@keyframes a83-wire-flow{
+  from{ background-position: 0% 50%; }
+  to  { background-position: 200% 50%; }
+}
+
+/* Sichtbarkeit nur Desktop/XL (zum Testen ggf. deaktivieren) */
+@media (max-width: 1279px){
+  #hero #text .neon-wire,
+  #hero .text .neon-wire{ display: none; }
+}
+
+/* XL-Tuning (mehr Reach in die Stage auf sehr breiten Screens) */
+@media (min-width: 1536px){
+  #hero{
+    --wire-angle: -8deg;
+    --wire-into-stage: clamp(240px, 16vw, 540px);
+    --wire-offset: 54%;
+    --wire-gap-fine: -8px;
+  }
+}
+
+/* Debug kurz aktivieren, dann wieder aus: */
+/* #hero #text .neon-wire, #hero .text .neon-wire{ outline: 1px dashed magenta !important; } */
+
+
+
+
+
+/* ===========================================================
+   PATCH: Wire bis zur Stage
+   - keine horizontale Verschiebung mehr
+   - Länge = Gap + in die Stage (mit kleinem End-Puffer)
+   =========================================================== */
+
+#hero{
+  /* wie weit das Wire in die Stage ragen soll */
+  --wire-into-stage: clamp(220px, 16vw, 520px);
+  /* wenn’s optisch früher enden soll (wegen Rundungen/Shadow) */
+  --wire-end-padding: 12px;
+}
+
+/* Breite präzise durchrechnen */
+#hero #text .neon-wire,
+#hero .text .neon-wire{
+  width: calc(var(--grid-gap, 56px) + var(--wire-into-stage) - var(--wire-end-padding));
+  /* nur vertikal zentrieren + kippen – KEIN translateX mehr */
+  transform: translateY(-50%) rotate(var(--wire-angle));
+}
+
+/* Debug kurz aktivieren, danach wieder aus: */
+/* #hero #text .neon-wire, #hero .text .neon-wire{ outline:1px dashed magenta !important; } */
+
+
+
+
+
+/* ===========================================================
+   A83 HERO — NEON WIRE: bis in/unter die Stage
+   - Segment A: .neon-wire (in #text/.text)
+   - Segment B: .neon-wire-under (in #show-max, ganz vorne eingefügt)
+   =========================================================== */
+
+/* Globale Wire-Variablen (einfach tunen) */
+#hero{
+  /* Geometrie */
+  --grid-gap: 56px;                             /* Desktop-Gap (muss zu BD-Grid passen) */
+  --wire-angle: -10deg;                         /* -12 … -6 */
+  --wire-thickness: 2px;                        /* 1.5–3px */
+  --wire-baseline: 56%;                         /* vertikale Linie (beide Segmente) */
+
+  /* Reichweiten */
+  --wire-join-overlap: 14px;                    /* Überlappung an der Stage-Kante (nahtlos) */
+  --wire-into-stage: clamp(240px, 18vw, 560px); /* wie weit das hinter dem Visual weiterläuft */
+
+  /* Look */
+  --wire-core-alpha: .90;                       /* 0.7–1.0 */
+  --wire-glow-alpha: .30;                       /* 0.18–.45 */
+  --wire-speed: 8s;                             /* Shimmer-Speed */
+
+  /* Gradient einmal definieren, beide nutzen ihn */
+  --wire-gradient: linear-gradient(90deg,
+      rgba(255,0,128,0) 0%,
+      rgba(255,0,128,var(--wire-core-alpha)) 12%,
+      rgba(0,255,255,var(--wire-core-alpha)) 50%,
+      rgba(255,0,128,var(--wire-core-alpha)) 88%,
+      rgba(255,0,128,0) 100%);
+}
+
+/* Optional: Source of truth für Gap direkt am Wrapper (falls du’s dort pflegen willst) */
+#hero .hero-wrapper{ --grid-gap: 56px; }
+
+/* ---------- SEGMENT A (im Text) ---------- */
+#hero #text, #hero .text{ position: relative; z-index: 3; overflow: visible; }
+#hero #stage, #hero .stage{ position: relative; z-index: 2; }
+
+#hero #text .neon-wire,
+#hero .text .neon-wire{
+  position: absolute; z-index: 5; pointer-events: none;
+  left: 100%; top: var(--wire-baseline);
+  /* Länge = Gap + kleine Überlappung in die Stage (versteckt die Naht) */
+  width: calc(var(--grid-gap, 56px) + var(--wire-join-overlap));
+  height: var(--wire-thickness);
+  transform: translateY(-50%) rotate(var(--wire-angle));
+  transform-origin: left center;
+}
+#hero #text .neon-wire::before,
+#hero .text .neon-wire::before{
+  content:""; position:absolute; inset:0; border-radius: 999px;
+  background: var(--wire-gradient); background-size: 200% 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0 5%, #000 15% 85%, transparent 95% 100%);
+          mask-image: linear-gradient(to right, transparent 0 5%, #000 15% 85%, transparent 95% 100%);
+  animation: a83-wire-flow var(--wire-speed) linear infinite;
+  filter: saturate(150%);
+}
+#hero #text .neon-wire::after,
+#hero .text .neon-wire::after{
+  content:""; position:absolute; left:-12px; right:-12px; top:-10px; bottom:-10px;
+  border-radius:999px; background: inherit; filter: blur(16px) saturate(160%);
+  opacity: var(--wire-glow-alpha); pointer-events:none;
+}
+
+/* ---------- SEGMENT B (in der Stage, unter dem Visual) ---------- */
+#hero #show-max{ position: relative; }
+#hero #show-max .neon-wire-under{
+  position: absolute; z-index: 0; pointer-events: none;
+  /* Nahtlos an Stage-Left andocken, etwas überlappen */
+  left: calc(0px - var(--wire-join-overlap));
+  top: var(--wire-baseline);
+  width: var(--wire-into-stage);
+  height: var(--wire-thickness);
+  transform: translateY(-50%) rotate(var(--wire-angle));
+  transform-origin: left center;
+  opacity: 1;
+}
+#hero #show-max .neon-wire-under::before{
+  content:""; position:absolute; inset:0; border-radius: 999px;
+  background: var(--wire-gradient); background-size: 200% 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0 3%, #000 10% 90%, transparent 97% 100%);
+          mask-image: linear-gradient(to right, transparent 0 3%, #000 10% 90%, transparent 97% 100%);
+  animation: a83-wire-flow var(--wire-speed) linear infinite;
+  filter: saturate(150%);
+}
+#hero #show-max .neon-wire-under::after{
+  content:""; position:absolute; left:-12px; right:-12px; top:-10px; bottom:-10px;
+  border-radius:999px; background: inherit; filter: blur(16px) saturate(160%);
+  opacity: var(--wire-glow-alpha); pointer-events:none;
+}
+
+/* Sicherstellen, dass Bild/Video darüber liegen */
+#hero #show-max .layer-img { position: relative; z-index: 1; }
+#hero #show-max .layer-video{ position: relative; z-index: 2; }
+
+/* Animation (beide Segmente teilen sich die Keyframes) */
+@keyframes a83-wire-flow{
+  from{ background-position: 0% 50%; }
+  to  { background-position: 200% 50%; }
+}
+
+/* Breakpoints: Wire nur Desktop */
+@media (max-width: 1279px){
+  #hero #text .neon-wire,
+  #hero .text .neon-wire,
+  #hero #show-max .neon-wire-under{ display: none; }
+}
+
+
+
+
+/* ===========================================================
+   NEON WIRE — Headspin-Gap & volle Reichweite (final)
+   - ersetzt den vorherigen Wire-Patch
+   =========================================================== */
+
+/* 1) Grid-Gap aus Headspin-Token beziehen (und spiegeln) */
+#hero .hero-wrapper{
+  gap: var(--hsp-m, var(--hsp-s, 96px));          /* visueller Grid-Gap im Layout */
+  --grid-gap: var(--hsp-m, var(--hsp-s, 96px));   /* selbe Zahl für Wire-Berechnung */
+}
+
+@media (min-width:1280px){
+  #hero .hero-wrapper{
+    gap: var(--hsp-l, var(--hsp-m, 112px));
+    --grid-gap: var(--hsp-l, var(--hsp-m, 112px));
+  }
+}
+@media (min-width:1536px){
+  #hero .hero-wrapper{
+    gap: var(--hsp-xl, var(--hsp-l, 128px));
+    --grid-gap: var(--hsp-xl, var(--hsp-l, 128px));
+  }
+}
+
+/* 2) Wire-Parameter: Naht kaschieren + tief in die Stage laufen */
+#hero{
+  --wire-angle: -10deg;                          /* -12 … -6 */
+  --wire-thickness: 2px;
+  --wire-baseline: 58%;                          /* vertikale Lage der Linie */
+
+  --wire-join-overlap: 18px;                     /* Text→Stage-Naht überdecken */
+  --wire-into-stage: clamp(420px, 26vw, 760px);  /* „hinter“ das Visual laufen */
+
+  /* Look/Animation (wie gehabt) */
+  --wire-core-alpha: .90;
+  --wire-glow-alpha: .30;
+  --wire-speed: 8s;
+}
+
+/* 3) Segment A (im Text): Länge = echter Gap + Overlap
+      – KEIN translateX mehr! */
+#hero #text .neon-wire,
+#hero .text .neon-wire{
+  width: calc(var(--grid-gap) + var(--wire-join-overlap));
+  height: var(--wire-thickness);
+  left: 100%;
+  top: var(--wire-baseline);
+  transform: translateY(-50%) rotate(var(--wire-angle));
+  transform-origin: left center;
+}
+
+/* 4) Segment B (unter dem Visual in #show-max) */
+#hero #show-max{ position: relative; }
+#hero #show-max .neon-wire-under{
+  position: absolute; z-index: 0; pointer-events: none;
+  left: calc(0px - var(--wire-join-overlap));
+  top: var(--wire-baseline);
+  width: var(--wire-into-stage);
+  height: var(--wire-thickness);
+  transform: translateY(-50%) rotate(var(--wire-angle));
+  transform-origin: left center;
+}
+
+/* 5) Debug kurz aktivieren, prüfen, wieder aus */
+/* #hero #text .neon-wire, #hero .text .neon-wire{ outline:1px dashed magenta !important; } */
+/* #hero #show-max .neon-wire-under{ outline:1px dashed cyan !important; } */
+
+
+
